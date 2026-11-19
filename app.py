@@ -89,3 +89,6 @@ exec("\n".join([
 "    reply = reply or ('Missing GEMINI_API_KEY in Secrets.' if not g_key else f'Model error: {err}')",
 "    st.session_state['messages'].append({'role': 'assistant', 'content': reply})",
 "    st.chat_message('assistant').markdown(reply)",
+        except Exception as ve:
+            st.caption(f'Voice error: {ve}')
+]))
