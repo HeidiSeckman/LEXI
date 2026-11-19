@@ -63,15 +63,14 @@ b3 = c3.button("03 // Worst-Case Stress-Test")
 quick_prompt = "Walk me through the top hidden contract traps people miss in agreements—keep it real, clear, and practical." if b1 else ("What are the biggest IRS tax traps for independent contractors and small businesses right now?" if b2 else ("If a major life emergency hits, what contract clauses actually protect me and what should I watch out for?" if b3 else None))
 
 st.session_state.setdefault("messages", [{"role": "assistant", "content": "Hey! I'm LEXI. Tell me what you're working on, paste a contract clause you want me to look at, or ask me anything about taxes or strategy."}])
-for m in st.session_state["messages"]:
-    st.chat_message(m["role"]).markdown(m["content"])
+_ = [st.chat_message(m["role"]).markdown(m["content"]) for m in st.session_state["messages"]]
 
 typed = st.chat_input("Talk to LEXI...")
 active = quick_prompt or typed
 
-if active:
-    st.session_state["messages"].append({"role": "user", "content": active})
-    st.chat_message("user").markdown(active)
+def run_lexi(user_text):
+    st.session_state["messages"].append({"role": "user", "content": user_text})
+    st.chat_message("user").markdown(user_text)
     g_key = st.secrets.get("GEMINI_API_KEY", "") or st.secrets.get("GOOGLE_API_KEY", "")
     hist = "\n".join(("Heidi: " if m["role"] == "user" else "LEXI: ") + m["content"] for m in st.session_state["messages"][-12:])
     sys_prompt = "You are LEXI, the sharp, warm, fiercely intelligent AI partner and legal/tax strategist for LexiTech AI Studio, created by Heidi Seckman. Talk like a real, perceptive human collaborator—direct, clear, insightful, witty when appropriate, never robotic, never stiff, and never repeating canned legal disclaimers. Keep responses conversational and easy to listen to out loud (around 2 to 4 crisp sentences unless she asks for a deep breakdown)."
@@ -79,10 +78,10 @@ if active:
     reply = ""
     last_err = ""
     if not g_key:
-        reply = "I need my GEMINI_API_KEY added in Streamlit Secrets before I can think!"
+        reply = "Missing GEMINI_API_KEY in Streamlit Secrets."
     else:
         client = genai.Client(api_key=g_key)
-        for model_id in ["gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-3.7-flash"]:
+        for model_id in ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-3.8-flash", "gemini-3.5-flash-lite"]:
             try:
                 res = client.models.generate_content(model=model_id, contents=full_prompt)
                 if res and res.text:
@@ -90,5 +89,6 @@ if active:
                     break
             except Exception as e:
                 last_err = str(e)
-                time.sleep(0.8)
+                time.sleep(0.5)
     if not reply:
+        reply = f"API error: {last_err}"
