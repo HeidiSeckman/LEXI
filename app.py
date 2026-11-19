@@ -1,4 +1,3 @@
-from lexi_identity import lexi_system_prompt, LEXI_IDENTITY
 import streamlit as st
 import base64
 import os
@@ -8,6 +7,7 @@ import requests
 
 from google import genai
 from google.genai import types
+from lexi_identity import lexi_system_prompt, LEXI_IDENTITY
 
 # ------------------------------------------------------------
 # LEXI // LexiTech — Gemini primary + Groq backup
