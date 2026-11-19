@@ -55,11 +55,10 @@
     <button type="button" class="btn" onclick="saveKeys()">Save Keys</button>
   </div>
 </div>
-
 <script>
 const VOICE_ID = "yM93hbw8Qtvdma2wCnJG";
 const audio = new Audio();
-let hist = [], loopMic = false, mic = null;
+let hist = Array.of(), loopMic = false, mic = null;
 
 function add(who, txt) {
   const l = document.getElementById("log"), d = document.createElement("div");
@@ -106,8 +105,15 @@ async function say(txt, nextMic) {
         if (nextMic && loopMic) setTimeout(() => listen(true), 300);
       };
       await audio.play();
-    } else { document.getElementById("stage").className = "box"; }
-  } catch (e) { document.getElementById("stage").className = "box"; }
+    } else {
+      const err = await r.json().catch(() => ({}));
+      add("LEXI", "Voice error: " + (err.detail && err.detail.message ? err.detail.message : r.status));
+      document.getElementById("stage").className = "box";
+    }
+  } catch (e) {
+    add("LEXI", "Audio error: " + e.message);
+    document.getElementById("stage").className = "box";
+  }
 }
 
 async function ask(q, voice) {
@@ -117,20 +123,22 @@ async function ask(q, voice) {
   const gk = localStorage.getItem("lexi_gemini_key");
   if (!gk) { add("LEXI", "Tap API Keys at the top right and paste your Gemini key first."); return; }
   document.getElementById("stat").textContent = "THINKING...";
-  hist.push({ role: "user", parts: [{ text: q }] });
+  hist.push({ role: "user", parts: Array.of({ text: q }) });
   if (hist.length > 24) hist = hist.slice(-24);
   try {
     const r = await fetch("https://googleapis.com" + encodeURIComponent(gk), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: "You are Lexi, a sharp, warm, witty conversational AI assistant created by Heidi Seckman. Talk naturally like a real person in 2 to 3 concise sentences without markdown symbols." }] },
+        systemInstruction: { parts: Array.of({ text: "You are Lexi, a sharp, warm, witty conversational AI assistant created by Heidi Seckman. Talk naturally like a real person in 2 to 3 concise sentences without markdown symbols." }) },
         contents: hist
       })
     });
     const d = await r.json();
-    const reply = (d.candidates && d.candidates[0] && d.candidates[0].content.parts[0].text || "Error: " + (d.error ? d.error.message : "No reply")).replace(/[*#_`]/g, "");
-    hist.push({ role: "model", parts: [{ text: reply }] });
+    const cand = d.candidates && d.candidates.at(0);
+    const part = cand && cand.content && cand.content.parts && cand.content.parts.at(0);
+    const reply = (part && part.text ? part.text : "API Error: " + (d.error ? d.error.message : "No reply")).replace(/[*#_`]/g, "");
+    hist.push({ role: "model", parts: Array.of({ text: reply }) });
     document.getElementById("stat").textContent = loopMic ? "HANDS-FREE ACTIVE" : "READY";
     add("LEXI", reply); say(reply, voice);
   } catch (e) {
@@ -151,7 +159,11 @@ function listen(follow) {
   if (mic) try { mic.abort(); } catch (e) {}
   mic = new SR(); mic.lang = "en-US";
   mic.onstart = () => { document.getElementById("stage").className = "box listening"; document.getElementById("stat").textContent = "LISTENING..."; };
-  mic.onresult = (e) => ask(e.results[0][0].transcript, true);
+  mic.onresult = (e) => {
+    const res = e.results && e.results.item(0);
+    const alt = res && res.item(0);
+    if (alt && alt.transcript) ask(alt.transcript, true);
+  };
   mic.onerror = () => { document.getElementById("stage").className = "box"; if (loopMic) setTimeout(() => listen(true), 500); };
   mic.start();
 }
