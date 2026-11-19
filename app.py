@@ -8,20 +8,11 @@ from google import genai
 
 st.set_page_config(page_title="LEXI // LexiTech Neural Core", page_icon="✨", layout="centered", initial_sidebar_state="collapsed")
 
-avatar_src = ""
-if os.path.exists("LEXI_avatar.png"):
-    with open("LEXI_avatar.png", "rb") as f:
-        avatar_src = "data:image/png;base64," + base64.b64encode(f.read()).decode()
+avatar_src = ("data:image/png;base64," + base64.b64encode(open("LEXI_avatar.png", "rb").read()).decode()) if os.path.exists("LEXI_avatar.png") else ""
 
 random.seed(7)
 glyphs = "01011001ABCDEF01§∆011001"
-cols = []
-for i in range(32):
-    lp = round(i * 3.1 + 0.5, 1)
-    dur = round(random.uniform(9.0, 18.0), 1)
-    dly = round(random.uniform(-16.0, 0.0), 1)
-    digits = "".join("<span>" + random.choice(glyphs) + "</span>" for _ in range(28))
-    cols.append(f'<div class="rain-col" style="left:{lp}%;animation-duration:{dur}s;animation-delay:{dly}s;">{digits}</div>')
+cols = [f'<div class="rain-col" style="left:{round(i*3.1+0.5,1)}%;animation-duration:{round(random.uniform(9.0,18.0),1)}s;animation-delay:{round(random.uniform(-16.0,0.0),1)}s;">' + "".join("<span>" + random.choice(glyphs) + "</span>" for _ in range(28)) + "</div>" for i in range(32)]
 
 css_rules = [
     "@import url('https://googleapis.com');",
@@ -70,47 +61,45 @@ hero_html = (
 )
 st.markdown(hero_html, unsafe_allow_html=True)
 
-quick_prompt = None
 c1, c2, c3 = st.columns(3)
-with c1:
-    if st.button("01 // Contract Clause Audit"):
-        quick_prompt = "Run a forensic contract audit checklist: what are the most dangerous indemnification, IP ownership, and auto-renewal clauses signers miss?"
-with c2:
-    if st.button("02 // Dual-Corpus Tax Trap"):
-        quick_prompt = "Explain the top IRS tax traps when classifying independent contractors vs. employees and deducting home-office or software expenses."
-with c3:
-    if st.button("03 // Worst-Case Stress-Test"):
-        quick_prompt = "Stress-test a standard service contract against a worst-case life event (medical emergency, sudden income loss, or force majeure). What protections should I demand?"
+b1 = c1.button("01 // Contract Clause Audit")
+b2 = c2.button("02 // Dual-Corpus Tax Trap")
+b3 = c3.button("03 // Worst-Case Stress-Test")
 
-def speak_paige(text):
+quick_prompt = "Run a forensic contract audit checklist: what are the most dangerous indemnification, IP ownership, and auto-renewal clauses signers miss?" if b1 else ("Explain the top IRS tax traps when classifying independent contractors vs. employees and deducting home-office or software expenses." if b2 else ("Stress-test a standard service contract against a worst-case life event (medical emergency, sudden income loss, or force majeure). What protections should I demand?" if b3 else None))
+
+st.session_state.setdefault("messages", [{"role": "assistant", "content": "LEXI Neural Core online. Paste a contract clause to audit, ask an IRS tax question, or tap one of the three forensic engines above."}])
+
+for msg in st.session_state["messages"]:
+    st.chat_message(msg["role"]).markdown(msg["content"])
+
+typed = st.chat_input("Ask LEXI about contract traps, IRS rules, or paste a clause...")
+active = quick_prompt or typed
+
+def try_gemini(key, prompt_text):
+    client = genai.Client(api_key=key)
+    for m in ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.7-flash"]:
+        try:
+            res = client.models.generate_content(model=m, contents=prompt_text)
+            if res and res.text:
+                return res.text
+        except Exception as e:
+            err = str(e)
+            time.sleep(1.0)
+    return f"⚠️ **Temporary Model Traffic Spike:** `{err}` — hit send again in a moment."
+
+def try_paige(text):
     el_key = st.secrets.get("ELEVENLABS_API_KEY", "")
     if not el_key:
         return None
-    url = "https://elevenlabs.io"
-    headers = {"xi-api-key": el_key, "Content-Type": "application/json"}
     clean = text.replace("*", "").replace("#", "").replace("`", "")[:600]
-    payload = {"text": clean, "model_id": "eleven_multilingual_v2", "voice_settings": {"stability": 0.45, "similarity_boost": 0.78}}
     try:
-        r = requests.post(url, json=payload, headers=headers, timeout=15)
+        r = requests.post("https://elevenlabs.io", json={"text": clean, "model_id": "eleven_multilingual_v2", "voice_settings": {"stability": 0.45, "similarity_boost": 0.78}}, headers={"xi-api-key": el_key, "Content-Type": "application/json"}, timeout=15)
         return r.content if r.status_code == 200 else None
     except Exception:
         return None
 
-def ask_lexi(api_key, prompt_text):
-    client = genai.Client(api_key=api_key)
-    last_err = ""
-    for m in ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.7-flash"]:
-        for _ in range(2):
-            try:
-                res = client.models.generate_content(model=m, contents=prompt_text)
-                if res.text:
-                    return res.text
-            except Exception as e:
-                last_err = str(e)
-                if "503" in last_err or "UNAVAILABLE" in last_err or "429" in last_err:
-                    time.sleep(1.2)
-                    continue
-                break
-    return f"⚠️ **Temporary Model Traffic Spike:** `{last_err}` — hit send again in a moment."
-
-if "messages" not in st.session_state:
+if active:
+    st.session_state["messages"].append({"role": "user", "content": active})
+    st.chat_message("user").markdown(active)
+    key = st.secrets.get("GEMINI_API_KEY", "") or st.secrets.get("GOOGLE_API_KEY", "")
