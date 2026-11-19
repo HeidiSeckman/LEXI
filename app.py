@@ -1,3 +1,4 @@
+from lexi_identity import lexi_system_prompt, LEXI_IDENTITY
 import streamlit as st
 import base64
 import os
