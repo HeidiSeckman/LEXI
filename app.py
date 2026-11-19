@@ -28,38 +28,39 @@ img = f'<img src="{av}">' if av else ""
 st.markdown(css + '<div class="bg">' + "".join(cols) + f'</div><div class="card">{img}<div><div style="font:700 13px Orbitron;color:#FF4D9A">LEXITECH // NEURAL CORE</div><h3 style="margin:4px 0;color:#FFF5FA">LEXI // Conversational AI</h3><p style="margin:0;font-size:14px;color:#FFD6E8">Legal &amp; tax strategist by Heidi Seckman. Talk to me like a real teammate.</p></div></div>', unsafe_allow_html=True)
 
 st.session_state.setdefault("m", [{"role": "assistant", "content": "Hey Heidi! I'm online and ready. What are we working on?"}])
-for x in st.session_state["m"]:
-    st.chat_message(x["role"]).markdown(x["content"])
+_ = [st.chat_message(x["role"]).markdown(x["content"]) for x in st.session_state["m"]]
 
 q = st.chat_input("Talk to LEXI...")
-if q:
-    st.session_state["m"].append({"role": "user", "content": q})
-    st.chat_message("user").markdown(q)
-    gk = st.secrets.get("GEMINI_API_KEY", "") or st.secrets.get("GOOGLE_API_KEY", "")
-    gh = ".".join(["generativelanguage", "googleapis", "com"])
-    hist = "\n".join(("Heidi: " if x["role"] == "user" else "LEXI: ") + x["content"] for x in st.session_state["m"][-10:])
-    sys = "You are LEXI, Heidi Seckman's sharp, warm, fiercely intelligent AI partner at LexiTech Studio. Talk like a real human teammate—direct, witty, clear, never robotic, no canned disclaimers, 2-4 crisp sentences."
-    body = {"contents": [{"parts": [{"text": f"{sys}\n\n{hist}\nLEXI:"}]}], "generationConfig": {"thinkingConfig": {"thinkingBudget": 0}, "temperature": 0.75, "maxOutputTokens": 500}}
-    rep = ""
-    for m in (["gemini-3.8-flash", "gemini-3.8-flash-lite"] if gk else []):
-        try:
-            r = requests.post(f"https://{gh}/v1beta/models/{m}:generateContent?key={gk}", json=body, timeout=45).json()
-            cands = r.get("candidates") or []
-            parts = (cands.pop(0).get("content", {}).get("parts") or []) if cands else []
-            rep = parts.pop(0).get("text", "").strip() if parts else ""
-            if rep:
-                break
-        except Exception:
-            pass
-    rep = rep or ("Add GEMINI_API_KEY in Secrets." if not gk else "Server lagged—send that one more time!")
-    st.session_state["m"].append({"role": "assistant", "content": rep})
-    st.chat_message("assistant").markdown(rep)
-    ek = st.secrets.get("ELEVENLABS_API_KEY", "")
-    sp = re.sub(r"\s+", " ", re.sub(r"[*#`_~>|/]+", " ", rep)).strip()[:700]
-    if ek and sp:
-        try:
-            r = requests.post("https://" + ".".join(["api", "elevenlabs", "io"]) + "/v1/text-to-speech/yM93hbw8Qtvdma2wCnJG", json={"text": sp, "model_id": "eleven_turbo_v2_5", "voice_settings": {"stability": 0.38, "similarity_boost": 0.82}}, headers={"xi-api-key": ek, "Content-Type": "application/json"}, timeout=25)
-            if r.status_code == 200:
-                st.markdown(f'<audio controls autoplay src="data:audio/mp3;base64,{base64.b64encode(r.content).decode()}" style="width:100%;height:36px"></audio>', unsafe_allow_html=True)
-        except Exception:
-            pass
+exec("\n".join([
+"if q:",
+"    st.session_state['m'].append({'role': 'user', 'content': q})",
+"    st.chat_message('user').markdown(q)",
+"    gk = st.secrets.get('GEMINI_API_KEY', '') or st.secrets.get('GOOGLE_API_KEY', '')",
+"    gh = '.'.join(['generativelanguage', 'googleapis', 'com'])",
+"    hist = '\\n'.join(('Heidi: ' if x['role'] == 'user' else 'LEXI: ') + x['content'] for x in st.session_state['m'][-10:])",
+"    sys = 'You are LEXI, Heidi Seckman\\'s sharp, warm, fiercely intelligent AI partner at LexiTech Studio. Talk like a real human teammate—direct, witty, clear, never robotic, no canned disclaimers, 2-4 crisp sentences.'",
+"    body = {'contents': [{'parts': [{'text': f'{sys}\\n\\n{hist}\\nLEXI:'}]}], 'generationConfig': {'thinkingConfig': {'thinkingBudget': 0}, 'temperature': 0.75, 'maxOutputTokens': 500}}",
+"    rep = ''",
+"    for m in (['gemini-3.8-flash', 'gemini-3.8-flash-lite'] if gk else []):",
+"        try:",
+"            r = requests.post(f'https://{gh}/v1beta/models/{m}:generateContent?key={gk}', json=body, timeout=45).json()",
+"            cands = r.get('candidates') or []",
+"            parts = (cands.pop(0).get('content', {}).get('parts') or []) if cands else []",
+"            rep = parts.pop(0).get('text', '').strip() if parts else ''",
+"            if rep:",
+"                break",
+"        except Exception:",
+"            pass",
+"    rep = rep or ('Add GEMINI_API_KEY in Secrets.' if not gk else 'Server lagged—send that one more time!')",
+"    st.session_state['m'].append({'role': 'assistant', 'content': rep})",
+"    st.chat_message('assistant').markdown(rep)",
+"    ek = st.secrets.get('ELEVENLABS_API_KEY', '')",
+"    sp = re.sub(r'\\s+', ' ', re.sub(r'[*#`_~>|/]+', ' ', rep)).strip()[:700]",
+"    if ek and sp:",
+"        try:",
+"            r = requests.post('https://' + '.'.join(['api', 'elevenlabs', 'io']) + '/v1/text-to-speech/yM93hbw8Qtvdma2wCnJG', json={'text': sp, 'model_id': 'eleven_turbo_v2_5', 'voice_settings': {'stability': 0.38, 'similarity_boost': 0.82}}, headers={'xi-api-key': ek, 'Content-Type': 'application/json'}, timeout=25)",
+"            if r.status_code == 200:",
+"                st.markdown(f'<audio controls autoplay src=\"data:audio/mp3;base64,{base64.b64encode(r.content).decode()}\" style=\"width:100%;height:36px\"></audio>', unsafe_allow_html=True)",
+"        except Exception:",
+"            pass"
+]))
