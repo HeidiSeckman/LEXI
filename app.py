@@ -3,6 +3,7 @@ import base64
 import os
 import random
 import requests
+from google import genai
 
 st.set_page_config(page_title="LEXI // LexiTech Neural Core", page_icon="✨", layout="centered", initial_sidebar_state="collapsed")
 
@@ -46,8 +47,10 @@ css_rules = [
 
 st.markdown("<style>" + "\n".join(css_rules) + "</style>" + '<div class="cyber-bg"><div class="cyber-grid"></div>' + "".join(cols) + "</div>", unsafe_allow_html=True)
 
+studio_url = "https://" + ".".join(["heidiseckman", "github", "io"])
+gh_url = "https://" + "/".join([".".join(["github", "com"]), "HeidiSeckman"])
 img_tag = f'<img src="{avatar_src}" alt="LEXI">' if avatar_src else '<div style="color:#FF2A85;padding-top:55px;text-align:center;font-weight:700;">LEXI</div>'
-hero_html = '<div class="studio-navbar"><div class="studio-brand">LEXITECH</div><div class="nav-pills"><span class="nav-btn-primary">● LEXI NEURAL CORE</span><a class="nav-btn-outline" href="https://github.io" target="_blank">STUDIO HOME ↗</a><a class="nav-btn-outline" href="https://github.com" target="_blank">GITHUB ↗</a></div></div>' + f'<div class="lexi-hero-card"><div class="lexi-avatar-box">{img_tag}</div><div class="lexi-hero-copy"><div class="eyebrow-pill">CLOSED-BOOK LEGAL &amp; TAX AI CONCIERGE</div><div class="lexi-hero-title">LEXI // Forensic AI Core</div><p class="lexi-hero-desc">Interactive AI strategist engineered by Heidi Seckman to flag hidden contract traps, cross-check IRS publication rules, and simulate worst-case life event risks.</p></div></div>'
+hero_html = f'<div class="studio-navbar"><div class="studio-brand">LEXITECH</div><div class="nav-pills"><span class="nav-btn-primary">● LEXI NEURAL CORE</span><a class="nav-btn-outline" href="{studio_url}" target="_blank">STUDIO HOME ↗</a><a class="nav-btn-outline" href="{gh_url}" target="_blank">GITHUB ↗</a></div></div><div class="lexi-hero-card"><div class="lexi-avatar-box">{img_tag}</div><div class="lexi-hero-copy"><div class="eyebrow-pill">CLOSED-BOOK LEGAL &amp; TAX AI CONCIERGE</div><div class="lexi-hero-title">LEXI // Forensic AI Core</div><p class="lexi-hero-desc">Interactive AI strategist engineered by Heidi Seckman to flag hidden contract traps, cross-check IRS publication rules, and simulate worst-case life event risks.</p></div></div>'
 st.markdown(hero_html, unsafe_allow_html=True)
 
 c1, c2, c3 = st.columns(3)
@@ -70,15 +73,16 @@ st.chat_message("user").markdown(active)
 g_key = st.secrets.get("GEMINI_API_KEY", "") or st.secrets.get("GOOGLE_API_KEY", "")
 hist = "\n".join(("User: " if m["role"] == "user" else "LEXI: ") + m["content"] for m in st.session_state["messages"][-8:])
 sys_prompt = "You are LEXI, the holographic AI assistant for LexiTech Legal & Tax AI Studio by Heidi Seckman. Be sharp, concise, and authoritative on contract traps and IRS rules, with a brief non-representation note."
-payload = {"contents": [{"parts": [{"text": f"{sys_prompt}\n\n{hist}\nLEXI:"}]}]}
+full_prompt = f"{sys_prompt}\n\n{hist}\nLEXI:"
 
-r1 = requests.post(f"https://googleapis.com{g_key}", json=payload, timeout=20) if g_key else None
-d1 = r1.json() if (r1 is not None and "application/json" in r1.headers.get("content-type", "")) else {}
-cands1 = d1.get("candidates") or []
-parts1 = (cands1[0].get("content", {}).get("parts") or []) if cands1 else []
-text1 = parts1[0].get("text", "") if parts1 else ""
+client = genai.Client(api_key=g_key) if g_key else None
+res = client.models.generate_content(model="gemini-3.8-flash", contents=full_prompt) if client else None
+reply = (res.text if res and res.text else "⚠️ `GEMINI_API_KEY` is missing in Streamlit Cloud Secrets.")
 
-r2 = requests.post(f"https://googleapis.com{g_key}", json=payload, timeout=20) if (g_key and not text1) else None
-d2 = r2.json() if (r2 is not None and "application/json" in r2.headers.get("content-type", "")) else {}
-cands2 = d2.get("candidates") or []
-parts2 = (cands2[0].get("content", {}).get("parts") or []) if cands2 else []
+st.session_state["messages"].append({"role": "assistant", "content": reply})
+st.chat_message("assistant").markdown(reply)
+
+el_key = st.secrets.get("ELEVENLABS_API_KEY", "")
+el_host = ".".join(["api", "elevenlabs", "io"])
+el_url = f"https://{el_host}/v1/text-to-speech/yM93hbw8Qtvdma2wCnJG"
+clean_voice = reply.replace("*", "").replace("#", "").replace("`", "")[:600]
