@@ -66,22 +66,26 @@ _ = [st.chat_message(m["role"]).markdown(m["content"]) for m in st.session_state
 
 typed = st.chat_input("Talk to LEXI...")
 active = quick_prompt or typed
-None if active else st.stop()
 
-st.session_state["messages"].append({"role": "user", "content": active})
-st.chat_message("user").markdown(active)
-
-g_key = st.secrets.get("GEMINI_API_KEY", "") or st.secrets.get("GOOGLE_API_KEY", "")
-hist = "\n".join(("Heidi: " if m["role"] == "user" else "LEXI: ") + m["content"] for m in st.session_state["messages"][-12:])
-sys_p = "You are LEXI, the sharp, warm, fiercely intelligent AI partner and legal/tax strategist for LexiTech AI Studio, created by Heidi Seckman. Talk like a real, perceptive human collaborator—direct, clear, insightful, witty when appropriate, never robotic, never stiff, and never repeating canned legal disclaimers. Keep responses conversational and easy to listen to out loud (2 to 4 crisp sentences unless she asks for a deep breakdown)."
-prompt = f"{sys_p}\n\n{hist}\nLEXI:"
-
-client = genai.Client(api_key=g_key) if g_key else None
-r_list = []
-e_list = []
-exec("\n".join(["for mid in (['gemini-3.8-flash', 'gemini-3.8-flash-lite'] if client else []):", "    try:", "        res = client.models.generate_content(model=mid, contents=prompt)", "        r_list.append(res.text.strip()) if (res and res.text) else None", "        if r_list:", "            break", "    except Exception as ex:", "        e_list.append(f'{mid}: {ex}')"]))
-reply = r_list.pop(0) if r_list else ("Missing GEMINI_API_KEY in Secrets." if not g_key else f"Model error: {' | '.join(e_list)}")
-
-st.session_state["messages"].append({"role": "assistant", "content": reply})
-st.chat_message("assistant").markdown(reply)
-
+exec("\n".join([
+"if active:",
+"    st.session_state['messages'].append({'role': 'user', 'content': active})",
+"    st.chat_message('user').markdown(active)",
+"    g_key = st.secrets.get('GEMINI_API_KEY', '') or st.secrets.get('GOOGLE_API_KEY', '')",
+"    hist = '\\n'.join(('Heidi: ' if m['role'] == 'user' else 'LEXI: ') + m['content'] for m in st.session_state['messages'][-12:])",
+"    sys_p = 'You are LEXI, the sharp, warm, fiercely intelligent AI partner and legal/tax strategist for LexiTech AI Studio, created by Heidi Seckman. Talk like a real, perceptive human collaborator—direct, clear, insightful, witty when appropriate, never robotic, never stiff, and never repeating canned legal disclaimers. Keep responses conversational and easy to listen to out loud (2 to 4 crisp sentences unless she asks for a deep breakdown).'",
+"    prompt = f'{sys_p}\\n\\n{hist}\\nLEXI:'",
+"    client = genai.Client(api_key=g_key) if g_key else None",
+"    reply = ''",
+"    err = ''",
+"    for mid in (['gemini-3.8-flash', 'gemini-3.8-flash-lite'] if client else []):",
+"        try:",
+"            res = client.models.generate_content(model=mid, contents=prompt)",
+"            if res and res.text:",
+"                reply = res.text.strip()",
+"                break",
+"        except Exception as ex:",
+"            err = str(ex)",
+"    reply = reply or ('Missing GEMINI_API_KEY in Secrets.' if not g_key else f'Model error: {err}')",
+"    st.session_state['messages'].append({'role': 'assistant', 'content': reply})",
+"    st.chat_message('assistant').markdown(reply)",
