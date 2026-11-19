@@ -411,22 +411,9 @@ if user_prompt:
             with st.spinner("LEXI is preparing her voice..."):
                 audio_output = speak_with_elevenlabs(answer)
             if audio_output:
-                audio_b64 = base64.b64encode(audio_output).decode("ascii")
-                audio_html = (
-                    '<audio id="lexi-voice" controls autoplay '
-                    f'src="data:audio/mpeg;base64,{audio_b64}" '
-                    'style="width:100%;height:36px"></audio>'
-                    '<script>'
-                    'const a=document.getElementById("lexi-voice");'
-                    'const v=document.getElementById("lexi-av");'
-                    'if(a&&v){'
-                    'a.onplay=()=>v.classList.add("speaking");'
-                    'a.onended=()=>v.classList.remove("speaking");'
-                    'a.onpause=()=>v.classList.remove("speaking");'
-                    '}'
-                    '</script>'
-                )
-                st.markdown(audio_html, unsafe_allow_html=True)
+                # Use Streamlit's native audio player for better iPhone/Safari support.
+                # The user may need to tap Play because mobile browsers restrict autoplay.
+                st.audio(audio_output, format="audio/mpeg")
             else:
                 st.caption(
                     "Text response is ready. ElevenLabs did not return audio; "
