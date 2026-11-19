@@ -39,15 +39,27 @@ if q:
     gh = ".".join(["generativelanguage", "googleapis", "com"])
     hist = "\n".join(("Heidi: " if x["role"] == "user" else "LEXI: ") + x["content"] for x in st.session_state["m"][-10:])
     sys = "You are LEXI, Heidi Seckman's sharp, warm, fiercely intelligent AI partner at LexiTech Studio. Talk like a real human teammate—direct, witty, clear, never robotic, no canned disclaimers, 2-4 crisp sentences."
-    res = requests.post(f"https://{gh}/v1beta/models/gemini-3.8-flash:generateContent?key={gk}", json={"contents": [{"parts": [{"text": f"{sys}\n\n{hist}\nLEXI:"}]}]}, timeout=20).json() if gk else {}
-    cands = res.get("candidates") or []
-    parts = (cands.pop(0).get("content", {}).get("parts") or []) if cands else []
-    rep = parts.pop(0).get("text", "").strip() if parts else (res.get("error", {}).get("message") or "Add GEMINI_API_KEY in Secrets.")
+    body = {"contents": [{"parts": [{"text": f"{sys}\n\n{hist}\nLEXI:"}]}], "generationConfig": {"thinkingConfig": {"thinkingBudget": 0}, "temperature": 0.75, "maxOutputTokens": 500}}
+    rep = ""
+    for m in (["gemini-3.8-flash", "gemini-3.8-flash-lite"] if gk else []):
+        try:
+            r = requests.post(f"https://{gh}/v1beta/models/{m}:generateContent?key={gk}", json=body, timeout=45).json()
+            cands = r.get("candidates") or []
+            parts = (cands.pop(0).get("content", {}).get("parts") or []) if cands else []
+            rep = parts.pop(0).get("text", "").strip() if parts else ""
+            if rep:
+                break
+        except Exception:
+            pass
+    rep = rep or ("Add GEMINI_API_KEY in Secrets." if not gk else "Server lagged—send that one more time!")
     st.session_state["m"].append({"role": "assistant", "content": rep})
     st.chat_message("assistant").markdown(rep)
     ek = st.secrets.get("ELEVENLABS_API_KEY", "")
     sp = re.sub(r"\s+", " ", re.sub(r"[*#`_~>|/]+", " ", rep)).strip()[:700]
     if ek and sp:
-        r = requests.post("https://" + ".".join(["api", "elevenlabs", "io"]) + "/v1/text-to-speech/yM93hbw8Qtvdma2wCnJG", json={"text": sp, "model_id": "eleven_turbo_v2_5", "voice_settings": {"stability": 0.38, "similarity_boost": 0.82}}, headers={"xi-api-key": ek, "Content-Type": "application/json"}, timeout=20)
-        if r.status_code == 200:
-            st.markdown(f'<audio controls autoplay src="data:audio/mp3;base64,{base64.b64encode(r.content).decode()}" style="width:100%;height:36px"></audio>', unsafe_allow_html=True)
+        try:
+            r = requests.post("https://" + ".".join(["api", "elevenlabs", "io"]) + "/v1/text-to-speech/yM93hbw8Qtvdma2wCnJG", json={"text": sp, "model_id": "eleven_turbo_v2_5", "voice_settings": {"stability": 0.38, "similarity_boost": 0.82}}, headers={"xi-api-key": ek, "Content-Type": "application/json"}, timeout=25)
+            if r.status_code == 200:
+                st.markdown(f'<audio controls autoplay src="data:audio/mp3;base64,{base64.b64encode(r.content).decode()}" style="width:100%;height:36px"></audio>', unsafe_allow_html=True)
+        except Exception:
+            pass
