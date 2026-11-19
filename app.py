@@ -74,9 +74,12 @@ exec("\n".join([
 "    ek = st.secrets.get('ELEVENLABS_API_KEY', '').strip()",
 "    sp = re.sub(r'\\s+', ' ', re.sub(r'[*#`_~>|/]+', ' ', rep)).strip()[:650]",
 "    if ek and sp:",
-"        try:",
-"            vr = requests.post('https://' + '.'.join(['api', 'elevenlabs', 'io']) + '/v1/text-to-speech/WAhoMTNdLdMoq1j3wf3I', json={'text': sp, 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.42, 'similarity_boost': 0.82}}, headers={'xi-api-key': ek, 'Content-Type': 'application/json'}, timeout=20)",
-"            st.audio(vr.content, format='audio/mp3', autoplay=True) if vr.status_code == 200 else st.caption(f'Voice {vr.status_code}: {vr.text[:80]}')",
-"        except Exception as ve:",
-"            st.caption(f'Voice note: {ve}')"
+"        for vid in ['cgSgspJ2msm6clMCkdW9', '9BWtsMINqrJLrRacOk9x']:",
+"            try:",
+"                vr = requests.post('https://' + '.'.join(['api', 'elevenlabs', 'io']) + f'/v1/text-to-speech/{vid}', json={'text': sp, 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.42, 'similarity_boost': 0.82}}, headers={'xi-api-key': ek, 'Content-Type': 'application/json'}, timeout=20)",
+"                if vr.status_code == 200:",
+"                    st.audio(vr.content, format='audio/mp3', autoplay=True)",
+"                    break",
+"            except Exception:",
+"                pass"
 ]))
