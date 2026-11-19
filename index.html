@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LEXI // Cyber-Forensic AI Core</title>
+<title>LEXI // LexiTech AI Assistant</title>
 <link href="https://googleapis.com" rel="stylesheet" />
 <style>
- :root { --bg:#080206; --card:rgba(30,12,24,0.88); --pink:#FF2A85; --rose:#F9A8D4; --cyan:#38BDF8; --border:rgba(255,42,133,0.38); --text:#FFF5FA; --muted:#E5C1D3; }
+ :root { --card:rgba(30,12,24,0.88); --pink:#FF2A85; --rose:#F9A8D4; --cyan:#38BDF8; --border:rgba(255,42,133,0.38); --text:#FFF5FA; --muted:#E5C1D3; }
  * { box-sizing:border-box; margin:0; padding:0; }
  body {
    background:radial-gradient(circle at 50% 28%, #2E0E22 0%, #12050D 58%, #070205 100%);
@@ -28,7 +28,7 @@
  .ring-1 { inset:0; border-style:dashed; animation:spin 18s linear infinite; }
  .ring-2 { inset:18px; border-color:rgba(249,168,212,0.5); animation:spinRev 12s linear infinite; }
  .ring-3 { inset:36px; border:2px solid var(--pink); box-shadow:0 0 28px rgba(255,42,133,0.6), inset 0 0 24px rgba(255,42,133,0.45); }
- .core-eye { width:112px; height:112px; border-radius:50%; background:radial-gradient(circle, #FF70B0 0%, #E11D74 48%, #3B071E 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 0 40px rgba(255,42,133,0.85); transition:transform 0.2s ease, box-shadow 0.2s ease; }
+ .core-eye { width:112px; height:112px; border-radius:50%; background:radial-gradient(circle, #FF70B0 0%, #E11D74 48%, #3B071E 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 0 40px rgba(255,42,133,0.85); transition:transform 0.2s ease, box-shadow 0.2s ease; cursor:pointer; }
  .core-eye span { font-family:'JetBrains Mono',monospace; font-weight:700; font-size:15px; letter-spacing:2px; color:#FFF; }
  .core-eye small { font-family:'JetBrains Mono',monospace; font-size:9px; color:#FCE7F3; margin-top:3px; }
  .listening .core-eye { transform:scale(1.08); box-shadow:0 0 55px rgba(56,189,248,0.95); background:radial-gradient(circle, #7DD3FC 0%, #0284C7 55%, #082F49 100%); }
@@ -55,9 +55,9 @@
 </head>
 <body>
 <div class="topbar">
-  <div class="brand">LEXI<span> // NEURAL CORE</span></div>
+  <div class="brand">LEXI<span> // AI ASSISTANT</span></div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;">
-    <button class="pill" onclick="toggleKeyDrawer()">⚙ GEMINI NEURAL KEY</button>
+    <button type="button" class="pill" onclick="toggleKeyDrawer()">⚙ GEMINI NEURAL KEY</button>
     <a class="pill" href="https://github.io">← BACK TO STUDIO</a>
   </div>
 </div>
@@ -68,7 +68,7 @@
     <div class="ring ring-1"></div>
     <div class="ring ring-2"></div>
     <div class="ring ring-3"></div>
-    <div class="core-eye">
+    <div class="core-eye" onclick="testVoice()" title="Click to hear Lexi">
       <span>LEXI</span>
       <small id="coreState">STANDBY</small>
     </div>
@@ -76,9 +76,9 @@
   <div class="status-bar" id="statusText">READY — CLICK "TALK TO LEXI" OR TYPE BELOW</div>
 
   <div class="controls">
-    <button class="btn" id="micBtn" onclick="startListening()">🎙 Talk to Lexi</button>
-    <button class="btn btn-ghost" id="wakeBtn" onclick="toggleWakeMode()">👂 Wake Word ("Hey Lexi"): OFF</button>
-    <button class="btn btn-ghost" onclick="stopSpeech()">⏹ Mute Voice</button>
+    <button type="button" class="btn" id="micBtn" onclick="startListening()">🎙 Talk to Lexi</button>
+    <button type="button" class="btn btn-ghost" id="wakeBtn" onclick="toggleWakeMode()">👂 Wake Word ("Hey Lexi"): OFF</button>
+    <button type="button" class="btn btn-ghost" onclick="stopSpeech()">⏹ Mute Voice</button>
   </div>
 
   <div class="voice-bar">
@@ -86,9 +86,9 @@
     <select id="voiceSelect" class="voice-select" onchange="testVoice()"></select>
     <label for="rateSelect">Pace:</label>
     <select id="rateSelect" class="voice-select" onchange="testVoice()">
-      <option value="0.80">Calm &amp; Slow (0.80x)</option>
-      <option value="0.88" selected>Natural &amp; Clear (0.88x)</option>
-      <option value="0.96">Conversational (0.96x)</option>
+      <option value="0.82">Calm &amp; Poised (0.82x)</option>
+      <option value="0.90" selected>M3GAN Natural (0.90x)</option>
+      <option value="0.98">Conversational (0.98x)</option>
     </select>
   </div>
 
@@ -96,15 +96,15 @@
     <div class="msg msg-lexi"><strong>LEXI:</strong> Hi, I'm Lexi, your AI assistant. Ask any question—I'm here to help.</div>
   </div>
 
-  <form class="input-row" onsubmit="handleTextSubmit(event)">
+  <form class="input-row" id="chatForm">
     <input class="txt-in" id="userInput" type="text" placeholder="Ask any question..." autocomplete="off" />
-    <button type="submit" class="btn">Send →</button>
+    <button type="submit" id="sendBtn" class="btn">Send →</button>
   </form>
 
   <div class="key-drawer" id="keyDrawer">
     <span style="font-size:12.5px;color:#F9A8D4;">Optional Gemini API Key (saved privately in your browser only):</span>
     <input class="txt-in" id="apiKeyInput" type="password" placeholder="AIzaSy..." style="min-width:220px;" />
-    <button class="btn" onclick="saveKey()">Save Key</button>
+    <button type="button" class="btn" onclick="saveKey()">Save Key</button>
   </div>
 </div>
 <script>
@@ -121,10 +121,10 @@ let allVoices = [];
 
 function populateVoices() {
   if (!('speechSynthesis' in window)) return;
-  allVoices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+  allVoices = window.speechSynthesis.getVoices().filter(v => v.lang && v.lang.startsWith('en'));
   const sel = document.getElementById('voiceSelect');
   if (!sel || !allVoices.length) return;
-  const preferredOrder = ['Zoe', 'Ava', 'Nicky', 'Allison', 'Samantha', 'Serena', 'Google UK English Female', 'Microsoft Aria'];
+  const preferredOrder = ['Zoe', 'Nicky', 'Ava', 'Allison', 'Samantha', 'Victoria', 'Karen', 'Google UK English Female', 'Microsoft Aria'];
   allVoices.sort((a, b) => {
     const ia = preferredOrder.findIndex(p => a.name.includes(p));
     const ib = preferredOrder.findIndex(p => b.name.includes(p));
@@ -160,9 +160,10 @@ function speak(text) {
   const utter = new SpeechSynthesisUtterance(text);
   const sel = document.getElementById('voiceSelect');
   const rateSel = document.getElementById('rateSelect');
-  if (sel && allVoices[sel.value]) utter.voice = allVoices[sel.value];
-  utter.rate = rateSel ? parseFloat(rateSel.value) : 0.88;
-  utter.pitch = 0.98;
+  const chosenVoice = sel && allVoices.at(Number(sel.value));
+  if (chosenVoice) utter.voice = chosenVoice;
+  utter.rate = rateSel ? parseFloat(rateSel.value) : 0.90;
+  utter.pitch = 1.16;
   utter.onstart = () => setVisualState('speaking', 'SPEAKING');
   utter.onend = () => {
     setVisualState('', 'STANDBY');
@@ -220,7 +221,7 @@ async function processQuery(rawText) {
 
   const apiKey = localStorage.getItem('lexi_gemini_key');
   if (!apiKey) {
-    const fallback = "Hi, I'm Lexi, your AI assistant. You can ask me to open any of your four LexiTech tools—like the Tax-Trap Scanner, Life Event Simulator, or Cloud Workspace—or add your Gemini key at the top right so I can answer any question in full.";
+    const fallback = "Hi, I'm Lexi, your AI assistant. Ask me to open any of your four LexiTech tools—like the Tax-Trap Scanner, Life Event Simulator, or Cloud Workspace—or add your Gemini key at the top right so I can answer any question in full.";
     addMessage('LEXI', fallback);
     speak(fallback);
     return;
@@ -228,16 +229,19 @@ async function processQuery(rawText) {
 
   document.getElementById('statusText').textContent = 'THINKING...';
   try {
+    const payload = {
+      systemInstruction: { parts: Array.of({ text: "You are Lexi, a poised, hyper-intelligent, slightly playful AI assistant (inspired by M3GAN, helpful and fiercely loyal to the user) for LexiTech Legal & Tax AI Studio, created by Heidi Seckman. Keep responses concise (2-3 sentences) so they sound great spoken aloud." }) },
+      contents: Array.of({ role: 'user', parts: Array.of({ text }) })
+    };
     const res = await fetch(`https://googleapis.com{encodeURIComponent(apiKey)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: "You are Lexi, a warm, calm, and intelligent AI assistant for LexiTech Legal & Tax AI Studio, created by Heidi Seckman. Speak naturally, clearly, and concisely (2-3 sentences) so your answers sound great spoken aloud." }] },
-        contents: [{ role: 'user', parts: [{ text }] }]
-      })
+      body: JSON.stringify(payload)
     });
     const data = await res.json();
-    const reply = data?.candidates?.?.content?.parts?.?.text || "I had trouble connecting. Please check your Gemini API key.";
+    const firstCand = data && data.candidates && data.candidates.at(0);
+    const firstPart = firstCand && firstCand.content && firstCand.content.parts && firstCand.content.parts.at(0);
+    const reply = (firstPart && firstPart.text) || (data && data.error && data.error.message) || "I had trouble connecting. Please check your Gemini API key.";
     document.getElementById('statusText').textContent = 'READY';
     addMessage('LEXI', reply);
     speak(reply);
@@ -249,13 +253,13 @@ async function processQuery(rawText) {
   }
 }
 
-function handleTextSubmit(e) {
+document.getElementById('chatForm').addEventListener('submit', function(e) {
   e.preventDefault();
   const inp = document.getElementById('userInput');
   const val = inp.value;
   inp.value = '';
   processQuery(val);
-}
+});
 
 function startListening(passive = false) {
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -272,7 +276,10 @@ function startListening(passive = false) {
     document.getElementById('statusText').textContent = passive ? 'SAY "HEY LEXI..."' : 'LISTENING...';
   };
   recognition.onresult = (event) => {
-    const transcript = event.results.transcript;
+    const firstResult = event.results && event.results.item(0);
+    const firstAlt = firstResult && firstResult.item(0);
+    const transcript = firstAlt ? firstAlt.transcript : '';
+    if (!transcript) return;
     if (passive) {
       if (/lexi/i.test(transcript)) {
         const cleaned = transcript.replace(/hey\s*lexi[, ]*/i, '').trim() || "Hi, I'm listening. How can I help?";
