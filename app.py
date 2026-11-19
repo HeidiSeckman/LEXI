@@ -31,7 +31,7 @@ div.stButton>button{width:100%;border-radius:12px!important;background:rgba(18,6
 </style>"""
 
 img = f'<img id="lexi-av" src="{av}">' if av else ""
-st.markdown(css + '<div class="bg">' + "".join(cols) + f'</div><div class="card">{img}<div><div style="font:700 13px Orbitron;color:#FF4D9A">LEXITECH // NEURAL CORE v3</div><h3 style="margin:4px 0;color:#FFF5FA">LEXI // Autonomous Strategist</h3><p style="margin:0;font-size:14px;color:#FFD6E8">Forensic legal, tax &amp; execution partner built for you.</p></div></div>', unsafe_allow_html=True)
+st.markdown(css + '<div class="bg">' + "".join(cols) + f'</div><div class="card">{img}<div><div style="font:700 13px Orbitron;color:#FF4D9A">LEXITECH // NEURAL CORE v3</div><h3 style="margin:4px 0;color:#FFF5FA">LEXI</h3><p style="margin:0;font-size:14px;color:#FFD6E8">Forensic legal, tax &amp; execution partner built for you.</p></div></div>', unsafe_allow_html=True)
 
 with st.expander("🧠 Studio Memory Pin (Optional Context LEXI Always Remembers)", expanded=False):
     mem_note = st.text_input("Active focus, project, or rule for LEXI:", value="Building LexiTech Studio AI modules & protecting contracts/tax strategy.", label_visibility="collapsed")
@@ -39,7 +39,7 @@ c1, c2, c3 = st.columns(3)
 b1, b2, b3 = c1.button("⚖️ Contract Traps"), c2.button("🧾 IRS Tax Check"), c3.button("⚡ Risk Stress-Test")
 qp = "What are the top 3 hidden contract traps people miss, and how do I counter each?" if b1 else ("What are the biggest IRS tax traps for 1099 contractors right now?" if b2 else ("What 3 protective clauses save someone in a sudden life emergency?" if b3 else None))
 
-st.session_state.setdefault("m", [{"role": "assistant", "content": "Hey Heidi! Neural core upgraded and locked in. What are we strategizing or building right now?"}])
+st.session_state.setdefault("m", [{"role": "assistant", "content": "Hey there! Neural core upgraded and locked in. What are we strategizing or building right now?"}])
 _ = [st.chat_message(x["role"]).markdown(x["content"]) for x in st.session_state["m"]]
 
 mic = st.audio_input("🎙️ Tap to talk to LEXI")
