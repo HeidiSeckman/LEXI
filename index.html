@@ -6,7 +6,7 @@
 <title>LEXI // LexiTech AI Assistant</title>
 <link href="https://googleapis.com" rel="stylesheet" />
 <style>
- :root { --bg:#080206; --card:rgba(30,12,24,0.88); --pink:#FF2A85; --rose:#F9A8D4; --cyan:#38BDF8; --border:rgba(255,42,133,0.38); --text:#FFF5FA; --muted:#E5C1D3; }
+ :root { --card:rgba(30,12,24,0.88); --pink:#FF2A85; --rose:#F9A8D4; --cyan:#38BDF8; --border:rgba(255,42,133,0.38); --text:#FFF5FA; --muted:#E5C1D3; }
  * { box-sizing:border-box; margin:0; padding:0; }
  body {
    background:radial-gradient(circle at 50% 24%, #2E0E22 0%, #12050D 58%, #070205 100%);
@@ -23,11 +23,28 @@
  .brand span { color:var(--pink); }
  .pill { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:var(--rose); border:1px solid var(--border); background:rgba(255,42,133,0.12); padding:6px 14px; border-radius:999px; text-decoration:none; cursor:pointer; }
  .core-stage { width:100%; max-width:960px; background:var(--card); border:1.5px solid var(--border); border-radius:24px; padding:26px 24px 30px; display:flex; flex-direction:column; align-items:center; text-align:center; box-shadow:0 0 50px rgba(255,42,133,0.18); }
- .holo-stage { position:relative; width:260px; height:295px; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:8px 0 10px; cursor:pointer; }
- canvas#lexiHolo { display:block; width:260px; height:295px; filter:drop-shadow(0 0 18px rgba(255,42,133,0.75)); transition:filter 0.3s ease; }
- .listening canvas#lexiHolo { filter:drop-shadow(0 0 22px rgba(56,189,248,0.9)); }
- .speaking canvas#lexiHolo { filter:drop-shadow(0 0 26px rgba(255,42,133,1)); }
- .holo-tag { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1.5px; color:#FFF; background:rgba(255,42,133,0.22); border:1px solid var(--pink); padding:3px 12px; border-radius:999px; margin-top:-12px; }
+ .holo-stage { position:relative; width:270px; height:330px; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:6px 0 8px; cursor:pointer; }
+ .holo-avatar {
+   width:255px;
+   height:315px;
+   object-fit:contain;
+   mix-blend-mode:screen;
+   animation:holoFloat 4.2s ease-in-out infinite, holoFlicker 7s infinite;
+   filter:drop-shadow(0 0 18px rgba(255,42,133,0.65));
+   transition:filter 0.3s ease, transform 0.3s ease;
+   pointer-events:none;
+ }
+ .listening .holo-avatar {
+   filter:hue-rotate(155deg) saturate(1.4) drop-shadow(0 0 26px rgba(56,189,248,0.95));
+ }
+ .speaking .holo-avatar {
+   animation:holoSpeak 0.42s ease-in-out infinite alternate;
+   filter:brightness(1.12) saturate(1.25) drop-shadow(0 0 32px rgba(255,42,133,1));
+ }
+ @keyframes holoFloat { 0%, 100% { transform:translateY(0px); } 50% { transform:translateY(-8px); } }
+ @keyframes holoSpeak { from { transform:translateY(-3px) scale(1.0); } to { transform:translateY(-7px) scale(1.028); } }
+ @keyframes holoFlicker { 0%, 96%, 100% { opacity:0.98; } 97% { opacity:0.84; } 98% { opacity:0.99; } 99% { opacity:0.88; } }
+ .holo-tag { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1.5px; color:#FFF; background:rgba(255,42,133,0.22); border:1px solid var(--pink); padding:4px 14px; border-radius:999px; margin-top:-6px; }
  .status-bar { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--rose); margin:10px 0 16px; letter-spacing:0.5px; }
  .controls { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; align-items:center; margin-bottom:14px; }
  .voice-bar { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; align-items:center; margin-bottom:18px; font-size:12px; color:var(--muted); }
@@ -56,7 +73,7 @@
 <div class="core-stage">
   <div class="pill">LEXITECH AI ASSISTANT // ENGINEERED BY HEIDI SECKMAN</div>
   <div class="holo-stage" id="holoWrap" onclick="testVoice()" title="Click Lexi to hear her">
-    <canvas id="lexiHolo" width="260" height="295"></canvas>
+    <img class="holo-avatar" src="LEXI_avatar.png" alt="LEXI Hologram" />
     <div class="holo-tag" id="coreState">LEXI // STANDBY</div>
   </div>
   <div class="status-bar" id="statusText">READY — CLICK "TALK TO LEXI" OR TYPE BELOW</div>
@@ -73,7 +90,7 @@
     <label for="rateSelect">Pace:</label>
     <select id="rateSelect" class="voice-select" onchange="testVoice()">
       <option value="0.82">Calm &amp; Poised (0.82x)</option>
-      <option value="0.90" selected>M3GAN Natural (0.90x)</option>
+      <option value="0.90" selected>Natural &amp; Clear (0.90x)</option>
       <option value="0.98">Conversational (0.98x)</option>
     </select>
   </div>
@@ -104,7 +121,6 @@ const MODULES = {
 let wakeMode = false;
 let recognition = null;
 let allVoices = [];
-let holoMode = 'standby';
 
 function populateVoices() {
   if (!('speechSynthesis' in window)) return;
@@ -129,7 +145,6 @@ function setVisualState(state, label) {
   const wrap = document.getElementById('holoWrap');
   wrap.classList.remove('listening', 'speaking');
   if (state) wrap.classList.add(state);
-  holoMode = state || 'standby';
   document.getElementById('coreState').textContent = 'LEXI // ' + label;
 }
 
@@ -151,7 +166,7 @@ function speak(text) {
   const chosenVoice = sel && allVoices.at(Number(sel.value));
   if (chosenVoice) utter.voice = chosenVoice;
   utter.rate = rateSel ? parseFloat(rateSel.value) : 0.90;
-  utter.pitch = 1.18;
+  utter.pitch = 1.16;
   utter.onstart = () => setVisualState('speaking', 'SPEAKING');
   utter.onend = () => {
     setVisualState('', 'STANDBY');
@@ -218,7 +233,7 @@ async function processQuery(rawText) {
   document.getElementById('statusText').textContent = 'THINKING...';
   try {
     const payload = {
-      systemInstruction: { parts: Array.of({ text: "You are Lexi, a poised, hyper-intelligent, slightly playful AI assistant (inspired by M3GAN, helpful and fiercely loyal to the user) for LexiTech Legal & Tax AI Studio, created by Heidi Seckman. Keep responses concise (2-3 sentences) so they sound great spoken aloud." }) },
+      systemInstruction: { parts: Array.of({ text: "You are Lexi, a poised, warm, and intelligent AI assistant for LexiTech Legal & Tax AI Studio, created by Heidi Seckman. Speak naturally, clearly, and concisely (2-3 sentences) so your answers sound great spoken aloud." }) },
       contents: Array.of({ role: 'user', parts: Array.of({ text }) })
     };
     const res = await fetch(`https://googleapis.com{encodeURIComponent(apiKey)}`, {
@@ -297,174 +312,6 @@ function toggleWakeMode() {
   if (wakeMode) startListening(true);
   else if (recognition) recognition.abort();
 }
-
-const hc = document.getElementById('lexiHolo');
-const hctx = hc.getContext('2d');
-let ht = 0;
-
-function drawHologram() {
-  ht += 0.04;
-  hctx.clearRect(0, 0, 260, 295);
-
-  const isCyan = holoMode === 'listening';
-  const isSpeaking = holoMode === 'speaking';
-  const mainRGB = isCyan ? '56, 189, 248' : '255, 42, 133';
-  const lightRGB = isCyan ? '186, 230, 253' : '249, 168, 212';
-  const floatY = Math.sin(ht * 0.9) * 6;
-  const cx = 130;
-
-  // Holographic base emitter pad & upward projection beam
-  const beamGrad = hctx.createLinearGradient(cx, 268, cx, 40);
-  beamGrad.addColorStop(0, `rgba(${mainRGB}, 0.34)`);
-  beamGrad.addColorStop(1, `rgba(${mainRGB}, 0.0)`);
-  hctx.fillStyle = beamGrad;
-  hctx.beginPath();
-  hctx.moveTo(cx - 56, 268);
-  hctx.lineTo(cx + 56, 268);
-  hctx.lineTo(cx + 98, 45);
-  hctx.lineTo(cx - 98, 45);
-  hctx.closePath();
-  hctx.fill();
-
-  // Glowing emitter rings at bottom
-  for (let r = 0; r < 3; r++) {
-    const pulse = (Math.sin(ht * 1.5 + r) + 1) * 0.5;
-    hctx.strokeStyle = `rgba(${mainRGB}, ${0.35 + pulse * 0.45})`;
-    hctx.lineWidth = r === 0 ? 2.5 : 1.2;
-    hctx.beginPath();
-    hctx.ellipse(cx, 268 - r * 4, 58 - r * 12 + pulse * 4, 11 - r * 2, 0, 0, Math.PI * 2);
-    hctx.stroke();
-  }
-
-  hctx.save();
-  hctx.translate(0, floatY);
-
-  // Back hair silhouette (sleek shoulder-length M3GAN-style waves)
-  const hairGrad = hctx.createLinearGradient(cx, 36, cx, 185);
-  hairGrad.addColorStop(0, `rgba(${lightRGB}, 0.85)`);
-  hairGrad.addColorStop(1, `rgba(${mainRGB}, 0.25)`);
-  hctx.fillStyle = hairGrad;
-  hctx.strokeStyle = `rgba(${lightRGB}, 0.9)`;
-  hctx.lineWidth = 1.6;
-  hctx.beginPath();
-  hctx.moveTo(cx, 38);
-  hctx.bezierCurveTo(cx - 54, 40, cx - 64, 110, cx - 56, 175);
-  hctx.quadraticCurveTo(cx - 42, 182, cx - 34, 165);
-  hctx.lineTo(cx + 34, 165);
-  hctx.quadraticCurveTo(cx + 42, 182, cx + 56, 175);
-  hctx.bezierCurveTo(cx + 64, 110, cx + 54, 40, cx, 38);
-  hctx.fill();
-  hctx.stroke();
-
-  const bodyGrad = hctx.createLinearGradient(cx, 132, cx, 245);
-  bodyGrad.addColorStop(0, `rgba(${mainRGB}, 0.58)`);
-  bodyGrad.addColorStop(0.7, `rgba(${mainRGB}, 0.22)`);
-  bodyGrad.addColorStop(1, `rgba(${mainRGB}, 0.02)`);
-  hctx.fillStyle = bodyGrad;
-  hctx.strokeStyle = `rgba(${lightRGB}, 0.85)`;
-  hctx.lineWidth = 1.6;
-  hctx.beginPath();
-  hctx.moveTo(cx - 10, 130);
-  hctx.lineTo(cx - 44, 148);
-  hctx.quadraticCurveTo(cx - 56, 185, cx - 50, 232);
-  hctx.quadraticCurveTo(cx, 244, cx + 50, 232);
-  hctx.quadraticCurveTo(cx + 56, 185, cx + 44, 148);
-  hctx.lineTo(cx + 10, 130);
-  hctx.closePath();
-  hctx.fill();
-  hctx.stroke();
-
-  hctx.strokeStyle = `rgba(${lightRGB}, 0.75)`;
-  hctx.lineWidth = 1.2;
-  hctx.beginPath();
-  hctx.moveTo(cx - 16, 136);
-  hctx.lineTo(cx, 152);
-  hctx.lineTo(cx + 16, 136);
-  hctx.moveTo(cx, 152);
-  hctx.lineTo(cx, 182);
-  hctx.stroke();
-
-  hctx.fillStyle = `rgba(255, 255, 255, ${0.7 + Math.sin(ht * 2) * 0.25})`;
-  hctx.beginPath();
-  hctx.arc(cx, 184, isSpeaking ? 4.5 : 3.2, 0, Math.PI * 2);
-  hctx.fill();
-
-  hctx.fillStyle = `rgba(${lightRGB}, 0.45)`;
-  hctx.fillRect(cx - 8, 114, 16, 20);
-
-  const faceGrad = hctx.createRadialGradient(cx, 86, 6, cx, 88, 36);
-  faceGrad.addColorStop(0, `rgba(255, 245, 250, 0.92)`);
-  faceGrad.addColorStop(0.75, `rgba(${lightRGB}, 0.65)`);
-  faceGrad.addColorStop(1, `rgba(${mainRGB}, 0.55)`);
-  hctx.fillStyle = faceGrad;
-  hctx.strokeStyle = `rgba(255, 255, 255, 0.9)`;
-  hctx.lineWidth = 1.5;
-  hctx.beginPath();
-  hctx.moveTo(cx - 27, 74);
-  hctx.quadraticCurveTo(cx - 28, 108, cx, 118);
-  hctx.quadraticCurveTo(cx + 28, 108, cx + 27, 74);
-  hctx.quadraticCurveTo(cx + 26, 48, cx, 48);
-  hctx.quadraticCurveTo(cx - 26, 48, cx - 27, 74);
-  hctx.fill();
-  hctx.stroke();
-
-  hctx.fillStyle = `rgba(${mainRGB}, 0.72)`;
-  hctx.beginPath();
-  hctx.moveTo(cx - 28, 76);
-  hctx.quadraticCurveTo(cx - 24, 44, cx + 4, 45);
-  hctx.quadraticCurveTo(cx - 8, 66, cx - 28, 76);
-  hctx.moveTo(cx + 28, 76);
-  hctx.quadraticCurveTo(cx + 24, 45, cx - 2, 45);
-  hctx.quadraticCurveTo(cx + 12, 65, cx + 28, 76);
-  hctx.fill();
-
-  const blinkCycle = Math.sin(ht * 0.55);
-  const eyeOpen = blinkCycle > 0.97 ? 1.2 : 5.2;
-  hctx.fillStyle = isCyan ? '#0284C7' : '#B81D6F';
-  hctx.beginPath();
-  hctx.ellipse(cx - 11, 83, 5.2, eyeOpen, 0, 0, Math.PI * 2);
-  hctx.ellipse(cx + 11, 83, 5.2, eyeOpen, 0, 0, Math.PI * 2);
-  hctx.fill();
-
-  if (eyeOpen > 2) {
-    hctx.fillStyle = '#FFFFFF';
-    hctx.beginPath();
-    hctx.arc(cx - 12.2, 81.8, 1.8, 0, Math.PI * 2);
-    hctx.arc(cx + 9.8, 81.8, 1.8, 0, Math.PI * 2);
-    hctx.fill();
-  }
-
-  hctx.strokeStyle = `rgba(${mainRGB}, 0.9)`;
-  hctx.lineWidth = 1.4;
-  hctx.beginPath();
-  hctx.moveTo(cx - 17, 75);
-  hctx.quadraticCurveTo(cx - 11, 73, cx - 6, 75.5);
-  hctx.moveTo(cx + 6, 75.5);
-  hctx.quadraticCurveTo(cx + 11, 73, cx + 17, 75);
-  hctx.stroke();
-
-  const mouthOpen = isSpeaking ? Math.abs(Math.sin(ht * 5.2)) * 5.5 + 1.2 : 0.8;
-  hctx.fillStyle = isSpeaking ? '#9D174D' : `rgba(${mainRGB}, 0.85)`;
-  hctx.strokeStyle = '#FFFFFF';
-  hctx.lineWidth = 1.1;
-  hctx.beginPath();
-  hctx.ellipse(cx, 102, 6.5, mouthOpen, 0, 0, Math.PI * 2);
-  hctx.fill();
-  hctx.stroke();
-
-  hctx.fillStyle = 'rgba(8, 2, 6, 0.24)';
-  for (let y = 38; y < 245; y += 4) {
-    hctx.fillRect(cx - 65, y, 130, 1.3);
-  }
-
-  const sweepY = 40 + ((ht * 28) % 205);
-  hctx.fillStyle = `rgba(255, 255, 255, 0.22)`;
-  hctx.fillRect(cx - 62, sweepY, 124, 2.2);
-
-  hctx.restore();
-  requestAnimationFrame(drawHologram);
-}
-drawHologram();
 </script>
 </body>
 </html>
