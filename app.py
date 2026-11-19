@@ -2,6 +2,8 @@ import streamlit as st
 import base64
 import os
 import random
+import re
+import time
 import requests
 from google import genai
 
@@ -58,31 +60,35 @@ b1 = c1.button("01 // Contract Clause Audit")
 b2 = c2.button("02 // Dual-Corpus Tax Trap")
 b3 = c3.button("03 // Worst-Case Stress-Test")
 
-quick_prompt = "Run a forensic contract audit checklist: what are the most dangerous indemnification, IP ownership, and auto-renewal clauses signers miss?" if b1 else ("Explain the top IRS tax traps when classifying independent contractors vs. employees and deducting home-office or software expenses." if b2 else ("Stress-test a standard service contract against a worst-case life event (medical emergency, sudden income loss, or force majeure). What protections should I demand?" if b3 else None))
+quick_prompt = "Walk me through the top hidden contract traps people miss in agreements—keep it real, clear, and practical." if b1 else ("What are the biggest IRS tax traps for independent contractors and small businesses right now?" if b2 else ("If a major life emergency hits, what contract clauses actually protect me and what should I watch out for?" if b3 else None))
 
-st.session_state.setdefault("messages", [{"role": "assistant", "content": "LEXI Neural Core online. Paste a contract clause to audit, ask an IRS tax question, or tap one of the three forensic engines above."}])
-_ = [st.chat_message(m["role"]).markdown(m["content"]) for m in st.session_state["messages"]]
+st.session_state.setdefault("messages", [{"role": "assistant", "content": "Hey! I'm LEXI. Tell me what you're working on, paste a contract clause you want me to look at, or ask me anything about taxes or strategy."}])
+for m in st.session_state["messages"]:
+    st.chat_message(m["role"]).markdown(m["content"])
 
-typed = st.chat_input("Ask LEXI about contract traps, IRS rules, or paste a clause...")
+typed = st.chat_input("Talk to LEXI...")
 active = quick_prompt or typed
-None if active else st.stop()
 
-st.session_state["messages"].append({"role": "user", "content": active})
-st.chat_message("user").markdown(active)
-
-g_key = st.secrets.get("GEMINI_API_KEY", "") or st.secrets.get("GOOGLE_API_KEY", "")
-hist = "\n".join(("User: " if m["role"] == "user" else "LEXI: ") + m["content"] for m in st.session_state["messages"][-8:])
-sys_prompt = "You are LEXI, the holographic AI assistant for LexiTech Legal & Tax AI Studio by Heidi Seckman. Be sharp, concise, and authoritative on contract traps and IRS rules, with a brief non-representation note."
-full_prompt = f"{sys_prompt}\n\n{hist}\nLEXI:"
-
-client = genai.Client(api_key=g_key) if g_key else None
-res = client.models.generate_content(model="gemini-3.8-flash", contents=full_prompt) if client else None
-reply = (res.text if res and res.text else "⚠️ `GEMINI_API_KEY` is missing in Streamlit Cloud Secrets.")
-
-st.session_state["messages"].append({"role": "assistant", "content": reply})
-st.chat_message("assistant").markdown(reply)
-
-el_key = st.secrets.get("ELEVENLABS_API_KEY", "")
-el_host = ".".join(["api", "elevenlabs", "io"])
-el_url = f"https://{el_host}/v1/text-to-speech/yM93hbw8Qtvdma2wCnJG"
-clean_voice = reply.replace("*", "").replace("#", "").replace("`", "")[:600]
+if active:
+    st.session_state["messages"].append({"role": "user", "content": active})
+    st.chat_message("user").markdown(active)
+    g_key = st.secrets.get("GEMINI_API_KEY", "") or st.secrets.get("GOOGLE_API_KEY", "")
+    hist = "\n".join(("Heidi: " if m["role"] == "user" else "LEXI: ") + m["content"] for m in st.session_state["messages"][-12:])
+    sys_prompt = "You are LEXI, the sharp, warm, fiercely intelligent AI partner and legal/tax strategist for LexiTech AI Studio, created by Heidi Seckman. Talk like a real, perceptive human collaborator—direct, clear, insightful, witty when appropriate, never robotic, never stiff, and never repeating canned legal disclaimers. Keep responses conversational and easy to listen to out loud (around 2 to 4 crisp sentences unless she asks for a deep breakdown)."
+    full_prompt = f"{sys_prompt}\n\n{hist}\nLEXI:"
+    reply = ""
+    last_err = ""
+    if not g_key:
+        reply = "I need my GEMINI_API_KEY added in Streamlit Secrets before I can think!"
+    else:
+        client = genai.Client(api_key=g_key)
+        for model_id in ["gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-3.7-flash"]:
+            try:
+                res = client.models.generate_content(model=model_id, contents=full_prompt)
+                if res and res.text:
+                    reply = res.text.strip()
+                    break
+            except Exception as e:
+                last_err = str(e)
+                time.sleep(0.8)
+    if not reply:
