@@ -1,5 +1,6 @@
 import streamlit as st
 import base64, os, random, re, requests
+from google import genai
 
 st.set_page_config(page_title="LEXI // LexiTech", page_icon="✨", layout="centered")
 av = ("data:image/png;base64," + base64.b64encode(open("LEXI_avatar.png", "rb").read()).decode()) if os.path.exists("LEXI_avatar.png") else ""
@@ -41,33 +42,20 @@ typed = st.chat_input("Talk to LEXI...")
 
 exec("\n".join([
 "gk = (st.secrets.get('GEMINI_API_KEY', '') or st.secrets.get('GOOGLE_API_KEY', '')).strip()",
-"gh = '.'.join(['generativelanguage', 'googleapis', 'com'])",
 "q = qp or typed",
 "if mic and mic.getvalue() != st.session_state.get('last_mic'):",
 "    st.session_state['last_mic'] = mic.getvalue()",
-"    tbody = {'contents': [{'parts': [{'text': 'Transcribe this audio only.'}, {'inlineData': {'mimeType': 'audio/wav', 'data': base64.b64encode(mic.getvalue()).decode()}}]}], 'generationConfig': {'thinkingConfig': {'thinkingBudget': 0}}}",
-"    tr = requests.post(f'https://{gh}/v1beta/models/gemini-3.8-flash:generateContent?key={gk}', json=tbody, timeout=30).json()",
-"    tc = tr.get('candidates') or []",
-"    tp = (tc.pop(0).get('content', {}).get('parts') or []) if tc else []",
-"    q = tp.pop(0).get('text', '').strip() if tp else ''",
+"    cl = genai.Client(api_key=gk)",
+"    tr = cl.models.generate_content(model='gemini-3.8-flash', contents=['Transcribe this audio only:', genai.types.Part.from_bytes(data=mic.getvalue(), mime_type='audio/wav')])",
+"    q = tr.text.strip() if (tr and tr.text) else ''",
 "if q:",
 "    st.session_state['m'].append({'role': 'user', 'content': q})",
 "    st.chat_message('user').markdown(q)",
 "    hist = '\\n'.join(('Heidi: ' if x['role'] == 'user' else 'LEXI: ') + x['content'] for x in st.session_state['m'][-10:])",
 "    sys = 'You are LEXI, Heidi Seckman\\'s sharp, warm, fiercely intelligent AI partner at LexiTech Studio. Talk like a real human teammate—direct, witty, clear, never robotic, no canned disclaimers, 2-4 crisp sentences.'",
-"    body = {'contents': [{'parts': [{'text': f'{sys}\\n\\n{hist}\\nLEXI:'}]}], 'generationConfig': {'thinkingConfig': {'thinkingBudget': 0}, 'temperature': 0.75, 'maxOutputTokens': 350}}",
-"    rep = ''",
-"    for m in (['gemini-3.8-flash', 'gemini-3.5-flash-lite'] if gk else []):",
-"        try:",
-"            r = requests.post(f'https://{gh}/v1beta/models/{m}:generateContent?key={gk}', json=body, timeout=30).json()",
-"            cands = r.get('candidates') or []",
-"            parts = (cands.pop(0).get('content', {}).get('parts') or []) if cands else []",
-"            rep = parts.pop(0).get('text', '').strip() if parts else ''",
-"            if rep:",
-"                break",
-"        except Exception:",
-"            pass",
-"    rep = rep or 'Add GEMINI_API_KEY in Secrets.'",
+"    cl = genai.Client(api_key=gk)",
+"    res = cl.models.generate_content(model='gemini-3.8-flash', contents=f'{sys}\\n\\n{hist}\\nLEXI:')",
+"    rep = res.text.strip() if (res and res.text) else 'Say that again!'",
 "    st.session_state['m'].append({'role': 'assistant', 'content': rep})",
 "    st.chat_message('assistant').markdown(rep)",
 "    ek = st.secrets.get('ELEVENLABS_API_KEY', '').strip()",
