@@ -1,80 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LEXI // LexiTech AI Assistant</title>
-<link href="https://googleapis.com" rel="stylesheet" />
-<style>
- :root { --card:rgba(30,12,24,0.90); --pink:#FF2A85; --rose:#F9A8D4; --cyan:#38BDF8; --border:rgba(255,42,133,0.4); --text:#FFF5FA; --muted:#E5C1D3; }
- * { box-sizing:border-box; margin:0; padding:0; }
- body { background:radial-gradient(circle at 50% 24%, #2E0E22 0%, #12050D 58%, #070205 100%); color:var(--text); font-family:'Plus Jakarta Sans',sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:20px 16px 40px; }
- .topbar, .core-stage { width:100%; max-width:920px; background:var(--card); border:1px solid var(--border); border-radius:20px; position:relative; z-index:2; }
- .topbar { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
- .brand { font-weight:800; font-size:20px; } .brand span { color:var(--pink); }
- .pill { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:var(--rose); border:1px solid var(--border); background:rgba(255,42,133,0.14); padding:6px 14px; border-radius:999px; text-decoration:none; cursor:pointer; }
- .core-stage { padding:24px 20px 28px; display:flex; flex-direction:column; align-items:center; text-align:center; border-width:1.5px; box-shadow:0 0 45px rgba(255,42,133,0.2); }
- .holo-stage { width:240px; height:290px; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:6px 0; cursor:pointer; }
- .holo-avatar { width:230px; height:275px; object-fit:contain; mix-blend-mode:screen; animation:holoFloat 4s ease-in-out infinite; filter:drop-shadow(0 0 18px rgba(255,42,133,0.7)); }
- .listening .holo-avatar { filter:hue-rotate(155deg) saturate(1.4) drop-shadow(0 0 24px rgba(56,189,248,0.95)); }
- .speaking .holo-avatar { animation:holoSpeak 0.4s ease-in-out infinite alternate; filter:brightness(1.12) drop-shadow(0 0 30px rgba(255,42,133,1)); }
- @keyframes holoFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
- @keyframes holoSpeak { from { transform:translateY(-3px) scale(1); } to { transform:translateY(-7px) scale(1.03); } }
- .holo-tag { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; color:#FFF; background:rgba(255,42,133,0.25); border:1px solid var(--pink); padding:4px 14px; border-radius:999px; margin-top:-6px; }
- .status-bar { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--rose); margin:10px 0 14px; }
- .controls, .quick-chips { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:14px; }
- .chip { font-family:'JetBrains Mono',monospace; font-size:11px; color:#FCE7F3; background:rgba(255,42,133,0.16); border:1px solid var(--border); padding:6px 12px; border-radius:999px; cursor:pointer; text-decoration:none; }
- .btn { background:linear-gradient(135deg,#E11D74 0%,#88134D 100%); color:#FFF; font-weight:700; font-size:13.5px; padding:10px 20px; border-radius:999px; border:1px solid #F9A8D4; cursor:pointer; text-decoration:none; }
- .btn-ghost { background:transparent; border:1.5px solid var(--rose); color:var(--rose); }
- .chat-box { width:100%; max-width:740px; background:rgba(12,4,9,0.78); border:1px solid var(--border); border-radius:16px; padding:14px; text-align:left; max-height:250px; overflow-y:auto; margin-bottom:12px; display:flex; flex-direction:column; gap:10px; }
- .msg { font-size:13.8px; line-height:1.55; padding:10px 14px; border-radius:12px; }
- .msg-lexi { background:rgba(255,42,133,0.15); border-left:3px solid var(--pink); }
- .msg-user { background:rgba(255,255,255,0.08); border-right:3px solid var(--rose); color:var(--muted); align-self:flex-end; }
- .launch-link { display:inline-block; margin-top:8px; padding:6px 14px; border-radius:999px; background:var(--pink); color:#FFF; font-weight:700; font-size:12px; text-decoration:none; }
- .input-row { width:100%; max-width:740px; display:flex; gap:10px; }
- .txt-in { flex:1; background:rgba(255,255,255,0.08); border:1.5px solid var(--border); color:#FFF; border-radius:999px; padding:11px 18px; font-size:14px; outline:none; }
- .key-drawer { width:100%; max-width:740px; margin-top:14px; padding:14px; background:rgba(255,42,133,0.1); border:1px dashed var(--border); border-radius:14px; display:none; flex-wrap:wrap; gap:8px; }
- .key-drawer.open { display:flex; }
-</style>
-</head>
-<body>
-<div class="topbar">
-  <div class="brand">LEXI<span> // HOLOGRAPHIC AI</span></div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
-    <button type="button" class="pill" onclick="toggleKeys()">⚙ AI &amp; VOICE KEYS</button>
-    <a class="pill" id="backLink" href="#">← BACK TO STUDIO</a>
-  </div>
-</div>
-<div class="core-stage">
-  <div class="pill">LEXITECH AI ASSISTANT // ENGINEERED BY HEIDI SECKMAN</div>
-  <div class="holo-stage" id="holoWrap" onclick="speak('Hi, I am Lexi, your AI assistant. Ask any question.')">
-    <img class="holo-avatar" src="LEXI_avatar.png" alt="LEXI" />
-    <div class="holo-tag" id="coreState">LEXI // STANDBY</div>
-  </div>
-  <div class="status-bar" id="statusText">READY — TAP A MODULE, SPEAK, OR ASK A QUESTION</div>
-  <div class="controls">
-    <button type="button" class="btn" onclick="startMic()">🎙 Talk to Lexi</button>
-    <button type="button" class="btn btn-ghost" onclick="stopAudio()">⏹ Mute</button>
-  </div>
-  <div class="quick-chips">
-    <a class="chip" id="linkM1" href="#" target="_blank" rel="noopener">Module 01: Legal &amp; Tax ↗</a>
-    <a class="chip" id="linkM2" href="#" target="_blank" rel="noopener">Module 02: Tax-Trap Scanner ↗</a>
-    <a class="chip" id="linkM3" href="#" target="_blank" rel="noopener">Module 03: Life Event Sim ↗</a>
-    <a class="chip" id="linkM4" href="#" target="_blank" rel="noopener">Module 04: Cloud Workspace ↗</a>
-  </div>
-  <div class="chat-box" id="chatLog">
-    <div class="msg msg-lexi"><strong>LEXI:</strong> Hi, I'm Lexi, your AI assistant. Ask any question—I'm here to help.</div>
-  </div>
-  <div class="input-row">
-    <input class="txt-in" id="userInput" type="text" placeholder="Ask any question..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendText();}" />
-    <button type="button" class="btn" onclick="sendText()">Send →</button>
-  </div>
-  <div class="key-drawer" id="keyDrawer">
-    <input class="txt-in" id="gKey" type="password" placeholder="Gemini API Key (AIzaSy...)" />
-    <input class="txt-in" id="eKey" type="password" placeholder="ElevenLabs API Key (sk_...)" />
-    <button type="button" class="btn" onclick="saveKeys()">Save Keys</button>
-  </div>
-</div>
 <canvas id="rain" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.22;"></canvas>
 <script>
 const PROT = "https:" + "//";
@@ -94,7 +17,10 @@ document.getElementById("linkM2").href = MODS.m2.url;
 document.getElementById("linkM3").href = MODS.m3.url;
 document.getElementById("linkM4").href = MODS.m4.url;
 
-let audioObj = null, chatHist = Array.of();
+const audioPlayer = new Audio();
+let chatHist = Array.of();
+let handsFree = false;
+let activeMic = null;
 
 function setHolo(s, lbl) {
   const w = document.getElementById("holoWrap");
@@ -106,7 +32,7 @@ function setHolo(s, lbl) {
 function addMsg(who, txt, url, lbl) {
   const log = document.getElementById("chatLog");
   const d = document.createElement("div");
-  d.className = who === "LEXI" ? "msg msg-lexi" : "msg msg-user";
+  d.className = who === "LEXI" ? "msg msg-lexi" : (who === "SYSTEM" ? "msg msg-sys" : "msg msg-user");
   d.innerHTML = "<strong>" + who + ":</strong> " + txt;
   if (url) {
     const a = document.createElement("a");
@@ -118,29 +44,51 @@ function addMsg(who, txt, url, lbl) {
 }
 
 function stopAudio() {
-  if (audioObj) { audioObj.pause(); audioObj = null; }
+  audioPlayer.pause();
+  audioPlayer.src = "";
+  handsFree = false;
+  if (activeMic) { try { activeMic.abort(); } catch (e) {} }
   setHolo("", "STANDBY");
+  document.getElementById("statusText").textContent = "CONVERSATION PAUSED — TAP TALK TO RESUME";
 }
 
-async function speak(txt) {
-  stopAudio();
+async function speak(txt, autoListenNext = false) {
+  audioPlayer.pause();
   const ek = localStorage.getItem("lexi_eleven_key");
-  if (!ek) return;
+  if (!ek) {
+    if (autoListenNext && handsFree) startMic(true);
+    return;
+  }
   try {
     setHolo("speaking", "SPEAKING");
     const r = await fetch(PROT + "api.elevenlabs.io/v1/text-to-speech/" + PAIGE_ID, {
       method: "POST",
       headers: { "xi-api-key": ek, "Content-Type": "application/json" },
-      body: JSON.stringify({ text: txt, model_id: "eleven_turbo_v2_5", voice_settings: { stability: 0.42, similarity_boost: 0.85 } })
+      body: JSON.stringify({
+        text: txt,
+        model_id: "eleven_multilingual_v2",
+        voice_settings: { stability: 0.40, similarity_boost: 0.85, style: 0.25 }
+      })
     });
     if (r.ok) {
-      audioObj = new Audio(URL.createObjectURL(await r.blob()));
-      audioObj.onended = () => setHolo("", "STANDBY");
-      await audioObj.play();
+      const blob = await r.blob();
+      audioPlayer.src = URL.createObjectURL(blob);
+      audioPlayer.onended = () => {
+        setHolo("", "STANDBY");
+        if (autoListenNext && handsFree) {
+          setTimeout(() => startMic(true), 350);
+        }
+      };
+      await audioPlayer.play();
     } else {
+      const err = await r.json().catch(() => ({}));
+      addMsg("SYSTEM", "ElevenLabs Voice Error: " + (err?.detail?.message || err?.detail || r.status));
       setHolo("", "STANDBY");
     }
-  } catch (e) { setHolo("", "STANDBY"); }
+  } catch (e) {
+    addMsg("SYSTEM", "Voice Playback Error: " + e.message);
+    setHolo("", "STANDBY");
+  }
 }
 
 function toggleKeys() {
@@ -154,7 +102,8 @@ function saveKeys() {
   if (g) localStorage.setItem("lexi_gemini_key", g); else localStorage.removeItem("lexi_gemini_key");
   if (e) localStorage.setItem("lexi_eleven_key", e); else localStorage.removeItem("lexi_eleven_key");
   document.getElementById("keyDrawer").classList.remove("open");
-  addMsg("LEXI", "Keys saved."); speak("Keys saved.");
+  addMsg("LEXI", "Keys saved. I am ready to talk whenever you are.");
+  speak("Keys saved. I am ready to talk whenever you are.");
 }
 
 function checkNav(q) {
@@ -167,70 +116,110 @@ function checkNav(q) {
   return null;
 }
 
-function smartReply(q) {
-  const s = q.toLowerCase();
-  if (/^(hi|hello|hey|yo|sup)/.test(s)) return { t: "Hey! Ask me how any of our four engines work, ask a contract or tax question, or tell me which module to open." };
-  if (/(tax|trap|scanner|8332|module 2|02)/.test(s)) return { t: "Module 02 cross-examines contracts against IRS rules for traps like Form 8332 and 1099 classification.", u: MODS.m2.url, l: MODS.m2.name };
-  if (/(life|event|simulator|crisis|layoff|module 3|03)/.test(s)) return { t: "Module 03 stress-tests contracts against emergencies like layoffs or medical crises and drafts escape riders.", u: MODS.m3.url, l: MODS.m3.name };
-  if (/(workplace|workspace|vault|cloud|module 4|04)/.test(s)) return { t: "Module 04 is your LexiTech Pro Cloud Workspace with saved case folders and all four AI engines.", u: MODS.m4.url, l: MODS.m4.name };
-  if (/(assistant|document|audit|module 1|01)/.test(s)) return { t: "Module 01 audits contracts and 90MB+ of IRS manuals with exact page citations.", u: MODS.m1.url, l: MODS.m1.name };
-  return { t: "Add your Gemini API key under AI & Voice Keys at the top right for full open-ended AI answers, or tap any module button above." };
-}
-
-async function handleMsg(raw) {
+async function handleMsg(raw, fromVoice = false) {
   const txt = (raw || "").trim();
   if (!txt) return;
+
+  if (/^(stop|bye|goodbye|exit|end conversation|shut up)$/i.test(txt)) {
+    handsFree = false;
+    addMsg("YOU", txt);
+    addMsg("LEXI", "Got it, ending voice chat. Just tap Talk to Lexi whenever you want to pick back up.");
+    speak("Got it, ending voice chat. Just tap Talk to Lexi whenever you want to pick back up.", false);
+    return;
+  }
+
   addMsg("YOU", txt);
 
   const nav = checkNav(txt);
   if (nav) {
-    const msg = "Launching " + nav.name + ".";
-    addMsg("LEXI", msg, nav.url, nav.name); speak(msg);
-    setTimeout(() => { window.location.href = nav.url; }, 1200);
+    handsFree = false;
+    const msg = "Launching " + nav.name + " now.";
+    addMsg("LEXI", msg, nav.url, nav.name);
+    speak(msg, false);
+    setTimeout(() => { window.location.href = nav.url; }, 1400);
     return;
   }
 
   const gk = localStorage.getItem("lexi_gemini_key");
   if (!gk) {
-    const a = smartReply(txt);
-    addMsg("LEXI", a.t, a.u, a.l); speak(a.t);
+    addMsg("SYSTEM", "Paste your Gemini API Key (AIzaSy...) under AI & VOICE KEYS at the top right so we can have a real conversation.");
     return;
   }
 
   document.getElementById("statusText").textContent = "THINKING...";
   chatHist.push({ role: "user", parts: Array.of({ text: txt }) });
+  if (chatHist.length > 30) chatHist = chatHist.slice(-30);
+
   try {
     const res = await fetch(PROT + "://googleapis.com" + encodeURIComponent(gk), {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
-        systemInstruction: { parts: Array.of({ text: "You are Lexi, a sharp, direct, no-nonsense AI assistant for LexiTech Legal & Tax AI Studio created by Heidi Seckman. Never repeat yourself, never use filler fluff, and answer in 1 to 2 punchy sentences." }) }, 
+        systemInstruction: { parts: Array.of({ text: "You are Lexi, a sharp, warm, witty, and deeply intelligent conversational AI partner created by Heidi Seckman for LexiTech Legal & Tax AI Studio. Talk naturally like a real human friend and strategic collaborator—engaging, thoughtful, and perceptive. Keep your answers conversational and easy to listen to aloud (usually 2 to 4 natural sentences unless Heidi asks for deeper detail), ask natural follow-up questions to keep the conversation flowing, and never use robotic filler or markdown symbols like asterisks or bullet points since your words are spoken out loud." }) }, 
         contents: chatHist 
       })
     });
     const data = await res.json();
-    const reply = data?.candidates?.at(0)?.content?.parts?.at(0)?.text || smartReply(txt).t;
-    chatHist.push({ role: "model", parts: Array.of({ text: reply }) });
-    document.getElementById("statusText").textContent = "READY";
-    addMsg("LEXI", reply); speak(reply);
+    if (!res.ok) {
+      addMsg("SYSTEM", "Gemini API Error: " + (data?.error?.message || res.status));
+      document.getElementById("statusText").textContent = "ERROR";
+      return;
+    }
+    const rawReply = data?.candidates?.at(0)?.content?.parts?.at(0)?.text || "Sorry, I missed that—say it again?";
+    const cleanReply = rawReply.replace(/[*#_`]/g, "");
+    chatHist.push({ role: "model", parts: Array.of({ text: cleanReply }) });
+    document.getElementById("statusText").textContent = handsFree ? "HANDS-FREE CONVERSATION ACTIVE" : "READY";
+    addMsg("LEXI", cleanReply);
+    speak(cleanReply, fromVoice);
   } catch (e) {
-    document.getElementById("statusText").textContent = "READY";
-    const a = smartReply(txt);
-    addMsg("LEXI", a.t, a.u, a.l); speak(a.t);
+    document.getElementById("statusText").textContent = "ERROR";
+    addMsg("SYSTEM", "Network Error: " + e.message);
   }
 }
 
 function sendText() {
   const inp = document.getElementById("userInput");
-  const v = inp.value; inp.value = ""; handleMsg(v);
+  const v = inp.value; inp.value = "";
+  handleMsg(v, false);
 }
 
-function startMic() {
+function startMic(isFollowUp = false) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return;
-  const r = new SR(); r.lang = "en-US";
-  r.onstart = () => setHolo("listening", "LISTENING");
-  r.onresult = (e) => handleMsg(e.results?.item(0)?.item(0)?.transcript || "");
-  r.onend = () => setHolo("", "STANDBY");
+  if (!SR) { addMsg("SYSTEM", "Voice mic not supported in this browser."); return; }
+  if (!isFollowUp) handsFree = true;
+  if (activeMic) { try { activeMic.abort(); } catch (e) {} }
+
+  const r = new SR();
+  activeMic = r;
+  r.lang = "en-US";
+  r.interimResults = false;
+
+  r.onstart = () => {
+    setHolo("listening", "LISTENING");
+    document.getElementById("statusText").textContent = "LISTENING — SPEAK NATURALLY (SAY 'STOP' TO END)";
+  };
+
+  r.onresult = (e) => {
+    const spoken = e.results?.item(0)?.item(0)?.transcript || "";
+    if (spoken) handleMsg(spoken, true);
+  };
+
+  r.onerror = (ev) => {
+    setHolo("", "STANDBY");
+    if (ev.error === "no-speech" && handsFree) {
+      document.getElementById("statusText").textContent = "STILL LISTENING — GO AHEAD";
+      setTimeout(() => startMic(true), 400);
+    } else {
+      handsFree = false;
+      document.getElementById("statusText").textContent = "READY — TAP TALK TO LEXI";
+    }
+  };
+
+  r.onend = () => {
+    if (!document.getElementById("holoWrap").classList.contains("speaking") && !handsFree) {
+      setHolo("", "STANDBY");
+    }
+  };
+
   r.start();
 }
 
