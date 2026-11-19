@@ -42,7 +42,7 @@
   <div class="brand">LEXI<span> // HOLOGRAPHIC AI</span></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;">
     <button type="button" class="pill" onclick="toggleKeys()">⚙ AI &amp; VOICE KEYS</button>
-    <a class="pill" href="https://github.io">← BACK TO STUDIO</a>
+    <a class="pill" id="backLink" href="#">← BACK TO STUDIO</a>
   </div>
 </div>
 <div class="core-stage">
@@ -57,10 +57,10 @@
     <button type="button" class="btn btn-ghost" onclick="stopAudio()">⏹ Mute</button>
   </div>
   <div class="quick-chips">
-    <a class="chip" href="https://streamlit.app" target="_blank" rel="noopener">Module 01: Legal &amp; Tax ↗</a>
-    <a class="chip" href="https://streamlit.app" target="_blank" rel="noopener">Module 02: Tax-Trap Scanner ↗</a>
-    <a class="chip" href="https://streamlit.app" target="_blank" rel="noopener">Module 03: Life Event Sim ↗</a>
-    <a class="chip" href="https://streamlit.app" target="_blank" rel="noopener">Module 04: Cloud Workspace ↗</a>
+    <a class="chip" id="linkM1" href="#" target="_blank" rel="noopener">Module 01: Legal &amp; Tax ↗</a>
+    <a class="chip" id="linkM2" href="#" target="_blank" rel="noopener">Module 02: Tax-Trap Scanner ↗</a>
+    <a class="chip" id="linkM3" href="#" target="_blank" rel="noopener">Module 03: Life Event Sim ↗</a>
+    <a class="chip" id="linkM4" href="#" target="_blank" rel="noopener">Module 04: Cloud Workspace ↗</a>
   </div>
   <div class="chat-box" id="chatLog">
     <div class="msg msg-lexi"><strong>LEXI:</strong> Hi, I'm Lexi, your AI assistant. Ask any question—I'm here to help.</div>
@@ -71,25 +71,38 @@
   </div>
   <div class="key-drawer" id="keyDrawer">
     <input class="txt-in" id="gKey" type="password" placeholder="Gemini API Key (AIzaSy...)" />
-    <input class="txt-in" id="eKey" type="password" placeholder="ElevenLabs Key (sk_...) for real human voice" />
+    <input class="txt-in" id="eKey" type="password" placeholder="ElevenLabs API Key (sk_...)" />
     <button type="button" class="btn" onclick="saveKeys()">Save Keys</button>
   </div>
 </div>
 <canvas id="rain" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.22;"></canvas>
 <script>
+const PROT = "https:" + "//";
+const PAIGE_ID = "yM93hbw8Qtvdma2wCnJG";
+const STUDIO_HOME = PROT + "heidiseckman" + ".github.io";
+
 const MODS = {
-  m1: { name: "Legal & Tax Document AI Assistant", url: "https://streamlit.app" },
-  m2: { name: "Tax-Trap Contract Scanner", url: "https://streamlit.app" },
-  m3: { name: "Worst-Case Life Event Simulator", url: "https://streamlit.app" },
-  m4: { name: "LexiTech Pro Cloud Workspace", url: "https://streamlit.app" }
+  m1: { name: "Legal & Tax Document Assistant", url: PROT + "legal-tax-ai-assistant-8vttj8mpyeo3dlaoxzunac" + ".streamlit.app" },
+  m2: { name: "Tax-Trap Contract Scanner", url: PROT + "lexitech-tax-trap-contract-scanner-kzkf4rappq6fesyv2gy7kgs" + ".streamlit.app" },
+  m3: { name: "Worst-Case Life Event Simulator", url: PROT + "lexitech-life-event-simulator-ml2f72eoad2ytnngjurwat" + ".streamlit.app" },
+  m4: { name: "LexiTech Pro Cloud Workspace", url: PROT + "lexitech-workplace-jqfg2cjffckrfphhyyzrca" + ".streamlit.app" }
 };
+
+document.getElementById("backLink").href = STUDIO_HOME;
+document.getElementById("linkM1").href = MODS.m1.url;
+document.getElementById("linkM2").href = MODS.m2.url;
+document.getElementById("linkM3").href = MODS.m3.url;
+document.getElementById("linkM4").href = MODS.m4.url;
+
 let audioObj = null, chatHist = Array.of();
+
 function setHolo(s, lbl) {
   const w = document.getElementById("holoWrap");
   w.classList.remove("listening", "speaking");
   if (s) w.classList.add(s);
   document.getElementById("coreState").textContent = "LEXI // " + lbl;
 }
+
 function addMsg(who, txt, url, lbl) {
   const log = document.getElementById("chatLog");
   const d = document.createElement("div");
@@ -98,76 +111,101 @@ function addMsg(who, txt, url, lbl) {
   if (url) {
     const a = document.createElement("a");
     a.className = "launch-link"; a.href = url; a.target = "_blank"; a.rel = "noopener";
-    a.textContent = "Open " + lbl + " →";
+    a.textContent = "Launch " + lbl + " →";
     d.appendChild(document.createElement("br")); d.appendChild(a);
   }
   log.appendChild(d); log.scrollTop = log.scrollHeight;
 }
+
 function stopAudio() {
   if (audioObj) { audioObj.pause(); audioObj = null; }
-  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
   setHolo("", "STANDBY");
 }
+
 async function speak(txt) {
   stopAudio();
   const ek = localStorage.getItem("lexi_eleven_key");
-  if (ek) {
-    try {
-      setHolo("speaking", "SPEAKING");
-      const r = await fetch("https://elevenlabs.io", {
-        method: "POST",
-        headers: { "xi-api-key": ek, "Content-Type": "application/json" },
-        body: JSON.stringify({ text: txt, model_id: "eleven_turbo_v2_5" })
-      });
-      if (r.ok) {
-        audioObj = new Audio(URL.createObjectURL(await r.blob()));
-        audioObj.onended = () => setHolo("", "STANDBY");
-        await audioObj.play(); return;
-      }
-    } catch (e) {}
-  }
-  if (!("speechSynthesis" in window)) return;
-  const u = new SpeechSynthesisUtterance(txt);
-  const vs = window.speechSynthesis.getVoices().filter(v => v.lang && v.lang.startsWith("en"));
-  const vPick = Array.of("Karen", "Zoe", "Ava", "Samantha").map(n => vs.find(v => v.name.includes(n))).find(Boolean);
-  if (vPick) u.voice = vPick;
-  u.rate = 0.92; u.pitch = 1.05;
-  u.onstart = () => setHolo("speaking", "SPEAKING");
-  u.onend = () => setHolo("", "STANDBY");
-  window.speechSynthesis.speak(u);
+  if (!ek) return;
+  try {
+    setHolo("speaking", "SPEAKING");
+    const r = await fetch(PROT + "api.elevenlabs.io/v1/text-to-speech/" + PAIGE_ID, {
+      method: "POST",
+      headers: { "xi-api-key": ek, "Content-Type": "application/json" },
+      body: JSON.stringify({ text: txt, model_id: "eleven_turbo_v2_5", voice_settings: { stability: 0.42, similarity_boost: 0.85 } })
+    });
+    if (r.ok) {
+      audioObj = new Audio(URL.createObjectURL(await r.blob()));
+      audioObj.onended = () => setHolo("", "STANDBY");
+      await audioObj.play();
+    } else {
+      setHolo("", "STANDBY");
+    }
+  } catch (e) { setHolo("", "STANDBY"); }
 }
+
 function toggleKeys() {
   document.getElementById("keyDrawer").classList.toggle("open");
   document.getElementById("gKey").value = localStorage.getItem("lexi_gemini_key") || "";
   document.getElementById("eKey").value = localStorage.getItem("lexi_eleven_key") || "";
 }
+
 function saveKeys() {
   const g = document.getElementById("gKey").value.trim(), e = document.getElementById("eKey").value.trim();
   if (g) localStorage.setItem("lexi_gemini_key", g); else localStorage.removeItem("lexi_gemini_key");
   if (e) localStorage.setItem("lexi_eleven_key", e); else localStorage.removeItem("lexi_eleven_key");
   document.getElementById("keyDrawer").classList.remove("open");
-  addMsg("LEXI", "Keys saved on this device."); speak("Keys saved on this device.");
+  addMsg("LEXI", "Keys saved."); speak("Keys saved.");
 }
+
+function checkNav(q) {
+  const s = q.toLowerCase();
+  if (!/(open|launch|go|take|show|start|load)/.test(s)) return null;
+  if (/(tax|trap|scanner|02|module 2|two)/.test(s)) return MODS.m2;
+  if (/(life|event|simulator|crisis|03|module 3|three)/.test(s)) return MODS.m3;
+  if (/(workplace|workspace|vault|cloud|04|module 4|four)/.test(s)) return MODS.m4;
+  if (/(assistant|document|audit|01|module 1|one)/.test(s)) return MODS.m1;
+  return null;
+}
+
 function smartReply(q) {
   const s = q.toLowerCase();
+  if (/^(hi|hello|hey|yo|sup)/.test(s)) return { t: "Hey! Ask me how any of our four engines work, ask a contract or tax question, or tell me which module to open." };
   if (/(tax|trap|scanner|8332|module 2|02)/.test(s)) return { t: "Module 02 cross-examines contracts against IRS rules for traps like Form 8332 and 1099 classification.", u: MODS.m2.url, l: MODS.m2.name };
   if (/(life|event|simulator|crisis|layoff|module 3|03)/.test(s)) return { t: "Module 03 stress-tests contracts against emergencies like layoffs or medical crises and drafts escape riders.", u: MODS.m3.url, l: MODS.m3.name };
   if (/(workplace|workspace|vault|cloud|module 4|04)/.test(s)) return { t: "Module 04 is your LexiTech Pro Cloud Workspace with saved case folders and all four AI engines.", u: MODS.m4.url, l: MODS.m4.name };
   if (/(assistant|document|audit|module 1|01)/.test(s)) return { t: "Module 01 audits contracts and 90MB+ of IRS manuals with exact page citations.", u: MODS.m1.url, l: MODS.m1.name };
-  return { t: "I can explain any of your four LexiTech engines, check tax and contract rules, or open any module above. Add your Gemini API key under AI & Voice Keys for open-ended AI answers." };
+  return { t: "Add your Gemini API key under AI & Voice Keys at the top right for full open-ended AI answers, or tap any module button above." };
 }
+
 async function handleMsg(raw) {
   const txt = (raw || "").trim();
   if (!txt) return;
   addMsg("YOU", txt);
+
+  const nav = checkNav(txt);
+  if (nav) {
+    const msg = "Launching " + nav.name + ".";
+    addMsg("LEXI", msg, nav.url, nav.name); speak(msg);
+    setTimeout(() => { window.location.href = nav.url; }, 1200);
+    return;
+  }
+
   const gk = localStorage.getItem("lexi_gemini_key");
-  if (!gk) { const a = smartReply(txt); addMsg("LEXI", a.t, a.u, a.l); speak(a.t); return; }
+  if (!gk) {
+    const a = smartReply(txt);
+    addMsg("LEXI", a.t, a.u, a.l); speak(a.t);
+    return;
+  }
+
   document.getElementById("statusText").textContent = "THINKING...";
   chatHist.push({ role: "user", parts: Array.of({ text: txt }) });
   try {
-    const res = await fetch("https://googleapis.com" + encodeURIComponent(gk), {
+    const res = await fetch(PROT + "://googleapis.com" + encodeURIComponent(gk), {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ systemInstruction: { parts: Array.of({ text: "You are Lexi, the smart, poised AI assistant for LexiTech Legal & Tax AI Studio created by Heidi Seckman. Reply concisely in 2-3 sentences." }) }, contents: chatHist })
+      body: JSON.stringify({ 
+        systemInstruction: { parts: Array.of({ text: "You are Lexi, a sharp, direct, no-nonsense AI assistant for LexiTech Legal & Tax AI Studio created by Heidi Seckman. Never repeat yourself, never use filler fluff, and answer in 1 to 2 punchy sentences." }) }, 
+        contents: chatHist 
+      })
     });
     const data = await res.json();
     const reply = data?.candidates?.at(0)?.content?.parts?.at(0)?.text || smartReply(txt).t;
@@ -176,13 +214,16 @@ async function handleMsg(raw) {
     addMsg("LEXI", reply); speak(reply);
   } catch (e) {
     document.getElementById("statusText").textContent = "READY";
-    const a = smartReply(txt); addMsg("LEXI", a.t, a.u, a.l); speak(a.t);
+    const a = smartReply(txt);
+    addMsg("LEXI", a.t, a.u, a.l); speak(a.t);
   }
 }
+
 function sendText() {
   const inp = document.getElementById("userInput");
   const v = inp.value; inp.value = ""; handleMsg(v);
 }
+
 function startMic() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) return;
@@ -192,6 +233,7 @@ function startMic() {
   r.onend = () => setHolo("", "STANDBY");
   r.start();
 }
+
 (() => {
   const c = document.getElementById("rain"), x = c.getContext("2d"), ch = "01LEXI§10998332";
   let d = Array.of();
