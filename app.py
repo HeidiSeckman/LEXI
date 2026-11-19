@@ -3,7 +3,6 @@ import base64
 import os
 import random
 import re
-import time
 import requests
 from google import genai
 
@@ -20,7 +19,7 @@ css_rules = [
 "html, body { background-color: #050205 !important; color: #FFF5FA !important; font-family: 'Plus Jakarta Sans', sans-serif !important; overflow-x: hidden; }",
 ".stApp, [data-testid='stAppViewContainer'], [data-testid='stMain'], section.main { background: transparent !important; }",
 "#MainMenu, footer, header, [data-testid='stHeader'], [data-testid='stToolbar'], [data-testid='stDecoration'] { display: none !important; }",
-"[data-testid='stBottom'], [data-testid='stBottom'] > div, [data-testid='stBottomBlockContainer'], .stChatFloatingInputContainer { background: linear-gradient(180deg, rgba(5,2,5,0) 0%, #050205 30%) !important; border-top: none !important; z-index: 9999 !important; pointer-events: auto !important; }",
+"[data-testid='stBottom'], [data-testid='stBottom'] > div, [data-testid='stBottomBlockContainer'], .stChatFloatingInputContainer { background: linear-gradient(180deg, rgba(5,2,5,0) 0%, #050205 30%) !important; border-top: none !important; }",
 ".cyber-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: radial-gradient(circle at 50% 14%, rgba(255,42,133,0.16) 0%, rgba(18,5,13,0.85) 45%, #050205 100%); }",
 ".cyber-grid { position: absolute; inset: 0; background-image: linear-gradient(to right, rgba(255,42,133,0.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,42,133,0.045) 1px, transparent 1px); background-size: 44px 44px; }",
 ".rain-col { position: absolute; top: -100%; display: flex; flex-direction: column; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 18px; color: rgba(255,65,150,0.28); text-shadow: 0 0 6px rgba(255,42,133,0.35); user-select: none; animation: digitalFall linear infinite; }",
@@ -42,9 +41,9 @@ css_rules = [
 "div.stButton > button:hover { background: linear-gradient(90deg, rgba(255,42,133,0.28), rgba(184,20,91,0.35)) !important; border-color: #FF2A85 !important; }",
 "[data-testid='stChatMessage'] { background: rgba(16,5,12,0.8) !important; border: 1px solid rgba(255,42,133,0.32) !important; border-radius: 16px !important; padding: 14px 18px !important; margin-bottom: 12px !important; backdrop-filter: blur(14px) !important; }",
 "[data-testid='stChatMessage'] p, [data-testid='stChatMessage'] li, [data-testid='stChatMessage'] span { color: #FFF5FA !important; font-size: 0.94rem !important; line-height: 1.6 !important; }",
-"[data-testid='stChatInput'] { background: rgba(16,5,12,0.94) !important; border: 1px solid rgba(255,42,133,0.72) !important; border-radius: 16px !important; box-shadow: 0 0 28px rgba(255,42,133,0.28) !important; z-index: 9999 !important; pointer-events: auto !important; }",
-"[data-testid='stChatInput'] textarea { color: #FFF5FA !important; background: transparent !important; pointer-events: auto !important; }",
-"[data-testid='stChatInputSubmitButton'] { background: #FF2A85 !important; color: #FFF5FA !important; border-radius: 10px !important; pointer-events: auto !important; }"
+"[data-testid='stChatInput'] { background: rgba(16,5,12,0.94) !important; border: 1px solid rgba(255,42,133,0.72) !important; border-radius: 16px !important; box-shadow: 0 0 28px rgba(255,42,133,0.28) !important; }",
+"[data-testid='stChatInput'] textarea { color: #FFF5FA !important; background: transparent !important; }",
+"[data-testid='stChatInputSubmitButton'] { background: #FF2A85 !important; color: #FFF5FA !important; border-radius: 10px !important; }"
 ]
 
 st.markdown("<style>" + "\n".join(css_rules) + "</style>" + '<div class="cyber-bg"><div class="cyber-grid"></div>' + "".join(cols) + "</div>", unsafe_allow_html=True)
@@ -67,22 +66,23 @@ _ = [st.chat_message(m["role"]).markdown(m["content"]) for m in st.session_state
 
 typed = st.chat_input("Talk to LEXI...")
 active = quick_prompt or typed
+None if active else st.stop()
 
-code_lines = [
-"if active:",
-"    st.session_state['messages'].append({'role': 'user', 'content': active})",
-"    st.chat_message('user').markdown(active)",
-"    g_key = st.secrets.get('GEMINI_API_KEY', '') or st.secrets.get('GOOGLE_API_KEY', '')",
-"    hist = '\\n'.join(('Heidi: ' if m['role'] == 'user' else 'LEXI: ') + m['content'] for m in st.session_state['messages'][-12:])",
-"    sys_prompt = 'You are LEXI, the sharp, warm, fiercely intelligent AI partner and legal/tax strategist for LexiTech AI Studio, created by Heidi Seckman. Talk like a real, perceptive human collaborator—direct, clear, insightful, witty when appropriate, never robotic, never stiff, and never repeating canned legal disclaimers. Keep responses conversational and easy to listen to out loud (around 2 to 4 crisp sentences unless she asks for a deep breakdown).'",
-"    full_prompt = sys_prompt + '\\n\\n' + hist + '\\nLEXI:'",
-"    reply = ''",
-"    last_err = ''",
-"    if not g_key:",
-"        reply = 'Missing GEMINI_API_KEY in Streamlit Secrets.'",
-"    else:",
-"        client = genai.Client(api_key=g_key)",
-"        for model_id in ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash']:",
-"            try:",
-"                res = client.models.generate_content(model=model_id, contents=full_prompt)",
-"                if res and res.text:",
+st.session_state["messages"].append({"role": "user", "content": active})
+st.chat_message("user").markdown(active)
+
+g_key = st.secrets.get("GEMINI_API_KEY", "") or st.secrets.get("GOOGLE_API_KEY", "")
+hist = "\n".join(("Heidi: " if m["role"] == "user" else "LEXI: ") + m["content"] for m in st.session_state["messages"][-12:])
+sys_p = "You are LEXI, the sharp, warm, fiercely intelligent AI partner and legal/tax strategist for LexiTech AI Studio, created by Heidi Seckman. Talk like a real, perceptive human collaborator—direct, clear, insightful, witty when appropriate, never robotic, never stiff, and never repeating canned legal disclaimers. Keep responses conversational and easy to listen to out loud (2 to 4 crisp sentences unless she asks for a deep breakdown)."
+prompt = f"{sys_p}\n\n{hist}\nLEXI:"
+
+client = genai.Client(api_key=g_key) if g_key else None
+safe_gen = lambda m: client.models.generate_content(model=m, contents=prompt).text.strip()
+try_call = lambda m: (lambda fn: fn())(lambda: __import__("contextlib").suppress(Exception) and None)
+r_list = []
+_ = [r_list.append(client.models.generate_content(model=mid, contents=prompt).text.strip()) for mid in (["gemini-2.5-flash", "gemini-2.0-flash", "gemini-3.8-flash", "gemini-3.5-flash-lite"] if client else []) if not r_list]
+reply = r_list.pop(0) if r_list else ("Missing GEMINI_API_KEY in Secrets." if not g_key else "No reply returned.")
+
+st.session_state["messages"].append({"role": "assistant", "content": reply})
+st.chat_message("assistant").markdown(reply)
+
