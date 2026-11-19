@@ -77,11 +77,10 @@ sys_p = "You are LEXI, the sharp, warm, fiercely intelligent AI partner and lega
 prompt = f"{sys_p}\n\n{hist}\nLEXI:"
 
 client = genai.Client(api_key=g_key) if g_key else None
-safe_gen = lambda m: client.models.generate_content(model=m, contents=prompt).text.strip()
-try_call = lambda m: (lambda fn: fn())(lambda: __import__("contextlib").suppress(Exception) and None)
 r_list = []
-_ = [r_list.append(client.models.generate_content(model=mid, contents=prompt).text.strip()) for mid in (["gemini-2.5-flash", "gemini-2.0-flash", "gemini-3.8-flash", "gemini-3.5-flash-lite"] if client else []) if not r_list]
-reply = r_list.pop(0) if r_list else ("Missing GEMINI_API_KEY in Secrets." if not g_key else "No reply returned.")
+e_list = []
+exec("\n".join(["for mid in (['gemini-3.8-flash', 'gemini-3.8-flash-lite'] if client else []):", "    try:", "        res = client.models.generate_content(model=mid, contents=prompt)", "        r_list.append(res.text.strip()) if (res and res.text) else None", "        if r_list:", "            break", "    except Exception as ex:", "        e_list.append(f'{mid}: {ex}')"]))
+reply = r_list.pop(0) if r_list else ("Missing GEMINI_API_KEY in Secrets." if not g_key else f"Model error: {' | '.join(e_list)}")
 
 st.session_state["messages"].append({"role": "assistant", "content": reply})
 st.chat_message("assistant").markdown(reply)
