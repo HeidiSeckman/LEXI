@@ -275,41 +275,49 @@ def transcribe_with_groq(audio_bytes):
     return transcript
 
 def speak_with_elevenlabs(text_to_speak):
-    """Return MP3 bytes from the configured ElevenLabs voice."""
-    if not ELEVEN_KEY or not text_to_speak:
-        return None
+    """Return (MP3 bytes, diagnostic) using Jessica's selected voice ID."""
+    if not ELEVEN_KEY:
+        return None, "ELEVENLABS_API_KEY is missing from Streamlit Secrets."
 
     speech_text = re.sub(r"\s+", " ", text_to_speak)
     speech_text = re.sub(r"[*#`_~>|/]+", " ", speech_text).strip()[:700]
     if not speech_text:
-        return None
+        return None, "There was no text to send to ElevenLabs."
 
-    # Preserve the two voice IDs from the user's original app.
-    voice_ids = ["cgSgspJ2msm6clMCkdW9", "9BWtsMINqrJLrRacOk9x"]
-    for voice_id in voice_ids:
-        try:
-            result = requests.post(
-                f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
-                json={
-                    "text": speech_text,
-                    "model_id": "eleven_multilingual_v2",
-                    "voice_settings": {
-                        "stability": 0.42,
-                        "similarity_boost": 0.82,
-                    },
+    # Jessica — the exact voice ID supplied by the user.
+    voice_id = "cgSgspJ2msm6clMCkdW9"
+    try:
+        result = requests.post(
+            f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
+            json={
+                "text": speech_text,
+                "model_id": "eleven_multilingual_v2",
+                "voice_settings": {
+                    "stability": 0.42,
+                    "similarity_boost": 0.82,
                 },
-                headers={
-                    "xi-api-key": ELEVEN_KEY,
-                    "Content-Type": "application/json",
-                },
-                timeout=30,
-            )
-            if result.status_code == 200:
-                return result.content
-            # If a voice ID is invalid or unavailable, try the next one.
-        except requests.RequestException:
-            continue
-    return None
+            },
+            headers={
+                "xi-api-key": ELEVEN_KEY,
+                "Content-Type": "application/json",
+                "Accept": "audio/mpeg",
+            },
+            timeout=45,
+        )
+        if result.status_code != 200:
+            # Show a short provider diagnostic, never the API key.
+            try:
+                detail = result.json().get("detail", result.text)
+                if isinstance(detail, dict):
+                    detail = detail.get("message") or str(detail)
+            except ValueError:
+                detail = result.text
+            return None, f"ElevenLabs HTTP {result.status_code}: {str(detail)[:500]}"
+        if not result.content or not result.headers.get("Content-Type", "").startswith("audio/"):
+            return None, "ElevenLabs responded, but did not return an audio file."
+        return result.content, ""
+    except requests.RequestException as error:
+        return None, f"Could not reach ElevenLabs: {str(error)[:300]}"
 
 # ---------- Handle the current input ----------
 user_prompt = quick_prompt or typed
@@ -409,16 +417,13 @@ if user_prompt:
         # ElevenLabs voice remains independent of the selected AI provider.
         if ELEVEN_KEY:
             with st.spinner("LEXI is preparing her voice..."):
-                audio_output = speak_with_elevenlabs(answer)
+                audio_output, audio_error = speak_with_elevenlabs(answer)
             if audio_output:
                 # Use Streamlit's native audio player for better iPhone/Safari support.
                 # The user may need to tap Play because mobile browsers restrict autoplay.
                 st.audio(audio_output, format="audio/mpeg")
             else:
-                st.caption(
-                    "Text response is ready. ElevenLabs did not return audio; "
-                    "check its API key, voice access, and free-tier quota."
-                )
+                st.warning("Jessica voice could not be generated: " + audio_error)
         else:
             st.caption(
                 "Text response is ready. Add ELEVENLABS_API_KEY in Streamlit "
