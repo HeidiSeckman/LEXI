@@ -1,12 +1,12 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import base64
 import os
+import random
 import requests
 from google import genai
 
 st.set_page_config(
-    page_title="LEXI // LexiTech AI Core",
+    page_title="LEXI // LexiTech Neural Core",
     page_icon="✨",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -21,234 +21,345 @@ def get_base64_image(image_path):
 avatar_b64 = get_base64_image("LEXI_avatar.png")
 avatar_src = f"data:image/png;base64,{avatar_b64}" if avatar_b64 else ""
 
-# --- CYBER-PLUM UI + ZERO WHITE BAR + HOLOGRAPHIC GLOW ---
-st.markdown("""
+# --- GENERATE FAINT FALLING DIGITAL CODE RAIN (MATCHING HEIDISECKMAN.GITHUB.IO) ---
+random.seed(7)
+code_chars = "01011001ABCDEF01§∆011001"
+rain_columns = []
+for i in range(36):
+    left_pos = round(i * (100 / 36) + 0.5, 2)
+    dur = round(random.uniform(9.0, 19.0), 2)
+    del_sec = round(random.uniform(-18.0, 0.0), 2)
+    # Build vertical falling digit strand with varying opacity
+    strand = "".join(f"<span>{random.choice(code_chars)}</span>" for _ in range(30))
+    rain_columns.append(
+        f'<div class="rain-col" style="left:{left_pos}%;animation-duration:{dur}s;animation-delay:{del_sec}s;">{strand}</div>'
+    )
+falling_code_layer = f'<div class="cyber-bg"><div class="cyber-grid"></div>{"".join(rain_columns)}</div>'
+
+# --- LEXITECH STUDIO CYBER-FORENSIC THEME ---
+st.markdown(f"""
 <style>
 @import url('https://googleapis.com');
 
-/* Force deep cyber-plum background everywhere & kill white bars */
-html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"],
-[data-testid="stBottom"], [data-testid="stBottom"] > div,
-[data-testid="stBottomBlockContainer"], .stChatFloatingInputContainer {
-    background-color: #12050D !important;
-    background: #12050D !important;
+html, body {{
+    background-color: #050205 !important;
     color: #FFF5FA !important;
-    font-family: 'Inter', sans-serif !important;
-}
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    overflow-x: hidden;
+}}
 
-/* Hide Streamlit default chrome */
-#MainMenu, footer, header, [data-testid="stToolbar"], [data-testid="stDecoration"] {
+/* Transparent Streamlit wrappers so falling digital code is always visible */
+.stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"], section.main {{
+    background: transparent !important;
+    background-color: transparent !important;
+}}
+
+/* Remove default Streamlit header, footer, and white bottom bar */
+#MainMenu, footer, header, [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"] {{
     display: none !important;
     visibility: hidden !important;
-}
+}}
 
-/* Make main container float cleanly over the falling code canvas */
-.block-container {
-    position: relative;
-    z-index: 2;
-    padding-top: 1.5rem !important;
-    padding-bottom: 6rem !important;
-    max-width: 780px !important;
-}
+[data-testid="stBottom"], [data-testid="stBottom"] > div,
+[data-testid="stBottomBlockContainer"], .stChatFloatingInputContainer {{
+    background: linear-gradient(180deg, rgba(5,2,5,0) 0%, rgba(5,2,5,0.95) 28%, #050205 100%) !important;
+    border-top: none !important;
+}}
 
-/* Holographic Header Badge */
-.lexi-badge {
-    display: inline-block;
-    padding: 6px 18px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 42, 133, 0.65);
-    background: rgba(255, 42, 133, 0.12);
-    box-shadow: 0 0 18px rgba(255, 42, 133, 0.35);
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 2.5px;
-    color: #FF7EB6;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-}
+/* Full-Viewport Obsidian + Subtle Cyber Grid + Faint Falling Digital Code */
+.cyber-bg {{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 50% 14%, rgba(255, 42, 133, 0.16) 0%, rgba(18, 5, 13, 0.85) 45%, #050205 100%);
+}}
 
-/* Holographic Avatar Frame */
-.avatar-wrapper {
+.cyber-grid {{
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to right, rgba(255, 42, 133, 0.045) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 42, 133, 0.045) 1px, transparent 1px);
+    background-size: 44px 44px;
+}}
+
+.rain-col {{
+    position: absolute;
+    top: -100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 18px;
-}
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 18px;
+    color: rgba(255, 65, 150, 0.28);
+    text-shadow: 0 0 6px rgba(255, 42, 133, 0.35);
+    user-select: none;
+    animation-name: digitalFall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}}
 
-.avatar-frame {
+.rain-col span:nth-child(4n) {{
+    color: rgba(255, 150, 200, 0.42);
+}}
+
+@keyframes digitalFall {{
+    0%   {{ transform: translateY(-10vh); opacity: 0; }}
+    10%  {{ opacity: 1; }}
+    90%  {{ opacity: 0.9; }}
+    100% {{ transform: translateY(210vh); opacity: 0; }}
+}}
+
+/* Centered Workspace Container */
+.block-container {{
     position: relative;
-    width: 195px;
-    height: 245px;
-    border-radius: 22px;
-    padding: 3px;
-    background: linear-gradient(145deg, #FF2A85, #791848, #FF2A85);
-    box-shadow: 0 0 35px rgba(255, 42, 133, 0.45), inset 0 0 20px rgba(255, 42, 133, 0.3);
-    overflow: hidden;
-}
+    z-index: 2;
+    padding-top: 1.2rem !important;
+    padding-bottom: 6.5rem !important;
+    max-width: 820px !important;
+}}
 
-.avatar-frame img {
+/* Matching Top Navigation Bar from Studio Landing Page */
+.studio-navbar {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    margin-bottom: 18px;
+    border-radius: 16px;
+    background: rgba(16, 5, 12, 0.78);
+    border: 1px solid rgba(255, 42, 133, 0.35);
+    box-shadow: 0 0 25px rgba(255, 42, 133, 0.12);
+    backdrop-filter: blur(14px);
+}}
+
+.studio-brand {{
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    color: #FF4D9A;
+    text-shadow: 0 0 12px rgba(255, 42, 133, 0.45);
+}}
+
+.nav-pills {{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}}
+
+.nav-btn-primary {{
+    padding: 6px 15px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #FF2A85, #D81B6B);
+    color: #FFF5FA !important;
+    text-decoration: none !important;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    box-shadow: 0 0 16px rgba(255, 42, 133, 0.5);
+}}
+
+.nav-btn-outline {{
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(255, 42, 133, 0.08);
+    border: 1px solid rgba(255, 42, 133, 0.45);
+    color: #FFD6E8 !important;
+    text-decoration: none !important;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.8px;
+}}
+
+.nav-btn-outline:hover {{
+    border-color: #FF2A85;
+    background: rgba(255, 42, 133, 0.22);
+}}
+
+/* Hero Holographic Card (Matching Studio Hero Box) */
+.lexi-hero-card {{
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 22px 26px;
+    margin-bottom: 16px;
+    border-radius: 20px;
+    background: rgba(16, 5, 12, 0.76);
+    border: 1px solid rgba(255, 42, 133, 0.42);
+    box-shadow: 0 0 34px rgba(255, 42, 133, 0.16), inset 0 0 24px rgba(255, 42, 133, 0.08);
+    backdrop-filter: blur(16px);
+}}
+
+.lexi-avatar-box {{
+    flex-shrink: 0;
+    width: 126px;
+    height: 152px;
+    border-radius: 16px;
+    padding: 2px;
+    background: linear-gradient(145deg, #FF2A85, #4B0D2C, #FF7EB6);
+    box-shadow: 0 0 26px rgba(255, 42, 133, 0.45);
+}}
+
+.lexi-avatar-box img {{
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 19px;
+    object-position: top center;
+    border-radius: 14px;
     display: block;
-}
+}}
 
-.lexi-subtitle {
-    margin-top: 10px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.78rem;
-    letter-spacing: 1.8px;
-    color: rgba(255, 245, 250, 0.75);
-}
+.lexi-hero-copy {{
+    flex: 1;
+}}
 
-/* Module Pill Links */
-.module-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin: 14px 0 22px 0;
-}
-
-.module-pill {
-    text-align: center;
-    padding: 9px 10px;
+.eyebrow-pill {{
+    display: inline-block;
+    padding: 4px 12px;
     border-radius: 999px;
-    background: rgba(34, 10, 24, 0.85);
-    border: 1px solid rgba(255, 42, 133, 0.55);
+    background: rgba(255, 42, 133, 0.14);
+    border: 1px solid rgba(255, 42, 133, 0.45);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 1.5px;
+    color: #FF85B8;
+    margin-bottom: 8px;
+}}
+
+.lexi-hero-title {{
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: #FFF5FA;
+    margin: 0 0 6px 0;
+    line-height: 1.2;
+}}
+
+.lexi-hero-desc {{
+    font-size: 0.88rem;
+    color: rgba(255, 235, 245, 0.78);
+    line-height: 1.5;
+    margin: 0;
+}}
+
+/* Streamlit Quick-Audit Module Buttons */
+div.stButton > button {{
+    width: 100%;
+    border-radius: 14px !important;
+    background: rgba(18, 6, 14, 0.82) !important;
+    border: 1px solid rgba(255, 42, 133, 0.42) !important;
     color: #FFF5FA !important;
-    text-decoration: none !important;
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    box-shadow: 0 0 14px rgba(255, 42, 133, 0.22);
-    transition: all 0.2s ease;
-    backdrop-filter: blur(8px);
-}
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    padding: 0.65rem 0.85rem !important;
+    box-shadow: 0 0 18px rgba(255, 42, 133, 0.12) !important;
+    backdrop-filter: blur(12px) !important;
+    transition: all 0.2s ease !important;
+}}
 
-.module-pill:hover {
-    background: linear-gradient(90deg, #FF2A85, #C81964);
-    border-color: #FF85B8;
-    box-shadow: 0 0 22px rgba(255, 42, 133, 0.65);
+div.stButton > button:hover {{
+    background: linear-gradient(90deg, rgba(255, 42, 133, 0.28), rgba(184, 20, 91, 0.35)) !important;
+    border-color: #FF2A85 !important;
+    box-shadow: 0 0 24px rgba(255, 42, 133, 0.45) !important;
     transform: translateY(-1px);
-}
+}}
 
-/* Chat Messages Styling */
-[data-testid="stChatMessage"] {
-    background: rgba(28, 8, 20, 0.82) !important;
-    border: 1px solid rgba(255, 42, 133, 0.35) !important;
+/* Chat Messages (Forensic Glass Cards) */
+[data-testid="stChatMessage"] {{
+    background: rgba(16, 5, 12, 0.8) !important;
+    border: 1px solid rgba(255, 42, 133, 0.32) !important;
     border-radius: 16px !important;
     padding: 14px 18px !important;
     margin-bottom: 12px !important;
-    backdrop-filter: blur(10px) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
-}
+    backdrop-filter: blur(14px) !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55) !important;
+}}
 
-[data-testid="stChatMessage"] p, [data-testid="stChatMessage"] li, [data-testid="stChatMessage"] span {
+[data-testid="stChatMessage"] p, [data-testid="stChatMessage"] li, [data-testid="stChatMessage"] span {{
     color: #FFF5FA !important;
-    font-size: 0.95rem !important;
-    line-height: 1.55 !important;
-}
+    font-size: 0.94rem !important;
+    line-height: 1.6 !important;
+}}
 
-/* Bottom Chat Input Box - Sleek Cyber-Plum Glass */
-[data-testid="stChatInput"] {
-    background: rgba(26, 7, 18, 0.95) !important;
-    border: 1px solid #FF2A85 !important;
+/* Bottom Chat Input */
+[data-testid="stChatInput"] {{
+    background: rgba(16, 5, 12, 0.94) !important;
+    border: 1px solid rgba(255, 42, 133, 0.72) !important;
     border-radius: 16px !important;
-    box-shadow: 0 0 24px rgba(255, 42, 133, 0.35) !important;
-}
+    box-shadow: 0 0 28px rgba(255, 42, 133, 0.28) !important;
+    backdrop-filter: blur(16px) !important;
+}}
 
-[data-testid="stChatInput"] textarea {
+[data-testid="stChatInput"] textarea {{
     color: #FFF5FA !important;
     background: transparent !important;
-}
+}}
 
-[data-testid="stChatInput"] textarea::placeholder {
-    color: rgba(255, 245, 250, 0.55) !important;
-}
+[data-testid="stChatInput"] textarea::placeholder {{
+    color: rgba(255, 235, 245, 0.5) !important;
+}}
 
-[data-testid="stChatInputSubmitButton"] {
+[data-testid="stChatInputSubmitButton"] {{
     background: #FF2A85 !important;
     color: #FFF5FA !important;
     border-radius: 10px !important;
-}
+}}
 
-@media (max-width: 640px) {
-    .module-grid { grid-template-columns: repeat(2, 1fr); }
-}
+@media (max-width: 640px) {{
+    .lexi-hero-card {{ flex-direction: column; text-align: center; }}
+    .studio-navbar {{ flex-direction: column; gap: 10px; }}
+}}
 </style>
+{falling_code_layer}
 """, unsafe_allow_html=True)
-
-# --- FAINT FALLING DIGITAL CODE RAIN BACKGROUND ---
-components.html("""
-<script>
-const parentDoc = window.parent.document;
-if (!parentDoc.getElementById('lexi-matrix-canvas')) {
-    const canvas = parentDoc.createElement('canvas');
-    canvas.id = 'lexi-matrix-canvas';
-    canvas.style.position = 'fixed';
-    canvas.style.top = '0';
-    canvas.style.left = '0';
-    canvas.style.width = '100vw';
-    canvas.style.height = '100vh';
-    canvas.style.zIndex = '0';
-    canvas.style.pointerEvents = 'none';
-    canvas.style.opacity = '0.22';
-    parentDoc.body.prepend(canvas);
-
-    const ctx = canvas.getContext('2d');
-    const resize = () => {
-        canvas.width = window.parent.innerWidth;
-        canvas.height = window.parent.innerHeight;
-    };
-    resize();
-    window.parent.addEventListener('resize', resize);
-
-    const chars = '01LEXITECH§¶∆∑Ω10987654321ABCDEF';
-    const fontSize = 14;
-    let columns = Math.floor(canvas.width / fontSize);
-    let drops = Array(columns).fill(1);
-
-    setInterval(() => {
-        ctx.fillStyle = 'rgba(18, 5, 13, 0.12)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#FF2A85';
-        ctx.font = fontSize + 'px monospace';
-
-        for (let i = 0; i < drops.length; i++) {
-            const text = chars.charAt(Math.floor(Math.random() * chars.length));
-            ctx.fillText(text, i * fontSize, drops.at(i) * fontSize);
-            if (drops.at(i) * fontSize > canvas.height && Math.random() > 0.975) {
-                drops.splice(i, 1, 0);
-            } else {
-                drops.splice(i, 1, drops.at(i) + 1);
-            }
-        }
-    }, 55);
-}
-</script>
-""", height=0, width=0)
-# --- HOLOGRAPHIC AVATAR & STUDIO NAVIGATION ---
-avatar_html = f'<img src="{avatar_src}" alt="LEXI Core">' if avatar_src else '<div style="color:#FF2A85;padding-top:100px;text-align:center;">LEXI CORE</div>'
+# --- STUDIO NAVBAR + HOLOGRAPHIC LEXI HERO CARD ---
+avatar_img_tag = f'<img src="{avatar_src}" alt="LEXI Core">' if avatar_src else '<div style="color:#FF2A85;padding-top:60px;text-align:center;font-weight:700;">LEXI</div>'
 
 st.markdown(f"""
-<div class="avatar-wrapper">
-    <div class="lexi-badge">LEXI // HOLOGRAPHIC AI CORE</div>
-    <div class="avatar-frame">
-        {avatar_html}
+<div class="studio-navbar">
+    <div class="studio-brand">LEXITECH</div>
+    <div class="nav-pills">
+        <span class="nav-btn-primary">● LEXI NEURAL CORE</span>
+        <a class="nav-btn-outline" href="https://heidiseckman.github.io" target="_blank">STUDIO HOME ↗</a>
+        <a class="nav-btn-outline" href="https://github.com" target="_blank">GITHUB STUDIO ↗</a>
     </div>
-    <div class="lexi-subtitle">LEXITECH LEGAL &amp; TAX INTELLIGENCE</div>
 </div>
 
-<div class="module-grid">
-    <a class="module-pill" href="https://github.io" target="_blank">Studio Home</a>
-    <a class="module-pill" href="https://streamlit.app" target="_blank">Module 01</a>
-    <a class="module-pill" href="https://streamlit.app" target="_blank">Module 02</a>
-    <a class="module-pill" href="https://streamlit.app" target="_blank">Module 03</a>
+<div class="lexi-hero-card">
+    <div class="lexi-avatar-box">{avatar_img_tag}</div>
+    <div class="lexi-hero-copy">
+        <div class="eyebrow-pill">CLOSED-BOOK LEGAL &amp; TAX AI CONCIERGE</div>
+        <div class="lexi-hero-title">LEXI // Forensic AI Core</div>
+        <p class="lexi-hero-desc">
+            Interactive AI strategist engineered by Heidi Seckman to flag hidden contract traps, cross-check IRS publication rules, and simulate worst-case life event risks.
+        </p>
+    </div>
 </div>
 """, unsafe_allow_html=True)
+
+# --- 3 WORKING FORENSIC AUDIT TRIGGERS (MATCHING MODULES 01-03) ---
+quick_prompt = None
+c1, c2, c3 = st.columns(3)
+with c1:
+    if st.button("01 // Contract Clause Audit"):
+        quick_prompt = "Run a forensic contract audit checklist: what are the most dangerous indemnification, IP ownership, and auto-renewal clauses signers miss?"
+with c2:
+    if st.button("02 // Dual-Corpus Tax Trap"):
+        quick_prompt = "Explain the top IRS tax traps when classifying independent contractors vs. employees and deducting home-office or software expenses."
+with c3:
+    if st.button("03 // Worst-Case Stress-Test"):
+        quick_prompt = "Stress-test a standard service contract against a worst-case life event (medical emergency, sudden income loss, or force majeure). What protections should I demand?"
+
+st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
 # --- ELEVENLABS PAIGE VOICE SYNTHESIS ---
 def speak_paige(text):
@@ -261,7 +372,7 @@ def speak_paige(text):
         "xi-api-key": el_key,
         "Content-Type": "application/json"
     }
-    clean_text = text.replace("*", "").replace("#", "")[:600]
+    clean_text = text.replace("*", "").replace("#", "").replace("`", "")[:600]
     payload = {
         "text": clean_text,
         "model_id": "eleven_multilingual_v2",
@@ -275,10 +386,10 @@ def speak_paige(text):
         return None
     return None
 
-# --- CHAT HISTORY & GEMINI 2.5 FLASH ENGINE ---
+# --- CHAT HISTORY & GEMINI 3.6 FLASH ENGINE ---
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "content": "LexiTech AI Core online. Ask me about contract traps, IRS tax rules, or any LexiTech module."}
+        {"role": "assistant", "content": "LEXI Neural Core online. Paste a contract clause to audit, ask an IRS tax question, or tap one of the three forensic engines above."}
     ]
 
 for msg in st.session_state.messages:
@@ -287,14 +398,17 @@ for msg in st.session_state.messages:
 
 sys_prompt = (
     "You are LEXI, the holographic AI assistant for LexiTech Legal & Tax AI Studio, founded by Heidi Seckman. "
-    "Be sharp, concise, helpful, and authoritative on legal concepts, contract red flags, and IRS tax guidance. "
-    "Include a brief note that insights are informational and not formal legal or tax representation."
+    "Be sharp, structured, concise, and authoritative on contract red flags, IRS tax publications, and risk mitigation. "
+    "Include a brief closing note that insights are informational and not formal legal or tax representation."
 )
 
-if prompt := st.chat_input("Ask Lexi anything..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
+typed_prompt = st.chat_input("Ask LEXI about contract traps, IRS rules, or paste a clause...")
+active_prompt = quick_prompt or typed_prompt
+
+if active_prompt:
+    st.session_state.messages.append({"role": "user", "content": active_prompt})
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.markdown(active_prompt)
 
     with st.chat_message("assistant"):
         with st.spinner("LEXI is analyzing..."):
@@ -311,12 +425,12 @@ if prompt := st.chat_input("Ask Lexi anything..."):
                 try:
                     client = genai.Client(api_key=api_key)
                     response = client.models.generate_content(
-                        model="gemini-2.5-flash",
+                        model="gemini-3.6-flash",
                         contents=full_prompt
                     )
                     reply = response.text or "No response returned."
                 except Exception as e:
-                    reply = f"⚠️ **API Connection Issue:** `{str(e)}`\n\nDouble-check that your `GEMINI_API_KEY` in Streamlit Secrets has no extra quotes/spaces and is active."
+                    reply = f"⚠️ **API Connection Issue:** `{str(e)}`"
 
             st.markdown(reply)
             st.session_state.messages.append({"role": "assistant", "content": reply})
