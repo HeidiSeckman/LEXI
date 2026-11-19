@@ -1,6 +1,5 @@
 import streamlit as st
 import base64, os, random, re, requests
-from google import genai
 
 st.set_page_config(page_title="LEXI // LexiTech", page_icon="✨", layout="centered")
 av = ("data:image/png;base64," + base64.b64encode(open("LEXI_avatar.png", "rb").read()).decode()) if os.path.exists("LEXI_avatar.png") else ""
@@ -37,10 +36,13 @@ if q:
     st.session_state["m"].append({"role": "user", "content": q})
     st.chat_message("user").markdown(q)
     gk = st.secrets.get("GEMINI_API_KEY", "") or st.secrets.get("GOOGLE_API_KEY", "")
+    gh = ".".join(["generativelanguage", "googleapis", "com"])
     hist = "\n".join(("Heidi: " if x["role"] == "user" else "LEXI: ") + x["content"] for x in st.session_state["m"][-10:])
     sys = "You are LEXI, Heidi Seckman's sharp, warm, fiercely intelligent AI partner at LexiTech Studio. Talk like a real human teammate—direct, witty, clear, never robotic, no canned disclaimers, 2-4 crisp sentences."
-    res = genai.Client(api_key=gk).models.generate_content(model="gemini-3.8-flash", contents=f"{sys}\n\n{hist}\nLEXI:") if gk else None
-    rep = res.text.strip() if (res and res.text) else "Add GEMINI_API_KEY in Secrets."
+    res = requests.post(f"https://{gh}/v1beta/models/gemini-3.8-flash:generateContent?key={gk}", json={"contents": [{"parts": [{"text": f"{sys}\n\n{hist}\nLEXI:"}]}]}, timeout=20).json() if gk else {}
+    cands = res.get("candidates") or []
+    parts = (cands.pop(0).get("content", {}).get("parts") or []) if cands else []
+    rep = parts.pop(0).get("text", "").strip() if parts else (res.get("error", {}).get("message") or "Add GEMINI_API_KEY in Secrets.")
     st.session_state["m"].append({"role": "assistant", "content": rep})
     st.chat_message("assistant").markdown(rep)
     ek = st.secrets.get("ELEVENLABS_API_KEY", "")
