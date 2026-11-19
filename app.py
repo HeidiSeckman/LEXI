@@ -67,7 +67,7 @@ exec("\n".join([
 "        cl = genai.Client(api_key=gk)",
 "        for mid in ['gemini-3.8-flash', 'gemini-3.5-flash-lite']:",
 "            try:",
-"                res = cl.models.generate_content(model=mid, contents=f'{sys}\n\n{hist}\nLEXI:', config={'temperature': 0.1, 'tools': [{'google_search': {}}]})",
+"                res = cl.models.generate_content(model=mid, contents=f'{sys}\\n\\n{hist}\\nLEXI:', config={'temperature': 0.1, 'tools': [{'google_search': {}}]})",
 "                if res and res.text:",
 "                    rep = res.text.strip()",
 "                    break",
