@@ -83,7 +83,7 @@ exec("\n".join([
 "        el_err = ''",
 "        for em in ['eleven_multilingual_v2', 'eleven_turbo_v2_5']:",
 "            try:",
-"                r = requests.post('https://' + '.'.join(['api', 'elevenlabs', 'io']) + '/v1/text-to-speech/yM93hbw8Qtvdma2wCnJG', json={'text': sp, 'model_id': em, 'voice_settings': {'stability': 0.42, 'similarity_boost': 0.82}}, headers={'xi-api-key': ek, 'Content-Type': 'application/json'}, timeout=15)",
+"                r = requests.post('https://' + '.'.join(['api', 'elevenlabs', 'io']) + '/v1/text-to-speech/WAhoMTNdLdMoq1j3wf3I', json={'text': sp, 'model_id': em, 'voice_settings': {'stability': 0.42, 'similarity_boost': 0.82}}, headers={'xi-api-key': ek, 'Content-Type': 'application/json'}, timeout=15)",
 "                if r.status_code == 200:",
 "                    st.audio(r.content, format='audio/mp3', autoplay=True)",
 "                    el_err = ''",
