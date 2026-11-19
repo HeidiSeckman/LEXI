@@ -31,7 +31,7 @@ div.stButton>button{width:100%;border-radius:12px!important;background:rgba(18,6
 </style>"""
 
 img = f'<img id="lexi-av" src="{av}">' if av else ""
-st.markdown(css + '<div class="bg">' + "".join(cols) + f'</div><div class="card">{img}<div><div style="font:700 13px Orbitron;color:#FF4D9A">LEXITECH // NEURAL CORE v3</div><h3 style="margin:4px 0;color:#FFF5FA">LEXI // Autonomous Strategist</h3><p style="margin:0;font-size:14px;color:#FFD6E8">Forensic legal, tax &amp; execution partner for Heidi Seckman.</p></div></div>', unsafe_allow_html=True)
+st.markdown(css + '<div class="bg">' + "".join(cols) + f'</div><div class="card">{img}<div><div style="font:700 13px Orbitron;color:#FF4D9A">LEXITECH // NEURAL CORE v3</div><h3 style="margin:4px 0;color:#FFF5FA">LEXI // Autonomous Strategist</h3><p style="margin:0;font-size:14px;color:#FFD6E8">Forensic legal, tax &amp; execution partner built for you.</p></div></div>', unsafe_allow_html=True)
 
 with st.expander("🧠 Studio Memory Pin (Optional Context LEXI Always Remembers)", expanded=False):
     mem_note = st.text_input("Active focus, project, or rule for LEXI:", value="Building LexiTech Studio AI modules & protecting contracts/tax strategy.", label_visibility="collapsed")
