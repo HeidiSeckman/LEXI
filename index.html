@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LEXI // Cyber-Forensic AI Core</title>
+<link href="https://googleapis.com" rel="stylesheet" />
+<style>
+ :root { --bg:#080206; --card:rgba(30,12,24,0.88); --pink:#FF2A85; --rose:#F9A8D4; --cyan:#38BDF8; --border:rgba(255,42,133,0.38); --text:#FFF5FA; --muted:#E5C1D3; }
+ * { box-sizing:border-box; margin:0; padding:0; }
+ body {
+   background:radial-gradient(circle at 50% 28%, #2E0E22 0%, #12050D 58%, #070205 100%);
+   color:var(--text);
+   font-family:'Plus Jakarta Sans',sans-serif;
+   min-height:100vh;
+   display:flex;
+   flex-direction:column;
+   align-items:center;
+   padding:22px 18px 40px;
+ }
+ .topbar { width:100%; max-width:960px; display:flex; justify-content:space-between; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:12px 20px; margin-bottom:24px; flex-wrap:wrap; gap:10px; }
+ .brand { font-weight:800; font-size:21px; letter-spacing:1px; }
+ .brand span { color:var(--pink); }
+ .pill { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:var(--rose); border:1px solid var(--border); background:rgba(255,42,133,0.12); padding:6px 14px; border-radius:999px; text-decoration:none; cursor:pointer; }
+ .core-stage { width:100%; max-width:960px; background:var(--card); border:1.5px solid var(--border); border-radius:24px; padding:30px 24px; display:flex; flex-direction:column; align-items:center; text-align:center; box-shadow:0 0 50px rgba(255,42,133,0.18); }
+ .holo-wrap { position:relative; width:230px; height:230px; display:flex; align-items:center; justify-content:center; margin:8px 0 18px; }
+ .ring { position:absolute; border-radius:50%; border:1.5px solid rgba(255,42,133,0.45); transition:all 0.3s ease; }
+ .ring-1 { inset:0; border-style:dashed; animation:spin 18s linear infinite; }
+ .ring-2 { inset:18px; border-color:rgba(249,168,212,0.5); animation:spinRev 12s linear infinite; }
+ .ring-3 { inset:36px; border:2px solid var(--pink); box-shadow:0 0 28px rgba(255,42,133,0.6), inset 0 0 24px rgba(255,42,133,0.45); }
+ .core-eye { width:112px; height:112px; border-radius:50%; background:radial-gradient(circle, #FF70B0 0%, #E11D74 48%, #3B071E 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 0 40px rgba(255,42,133,0.85); transition:transform 0.2s ease, box-shadow 0.2s ease; }
+ .core-eye span { font-family:'JetBrains Mono',monospace; font-weight:700; font-size:15px; letter-spacing:2px; color:#FFF; }
+ .core-eye small { font-family:'JetBrains Mono',monospace; font-size:9px; color:#FCE7F3; margin-top:3px; }
+ .listening .core-eye { transform:scale(1.08); box-shadow:0 0 55px rgba(56,189,248,0.95); background:radial-gradient(circle, #7DD3FC 0%, #0284C7 55%, #082F49 100%); }
+ .listening .ring-3 { border-color:var(--cyan); box-shadow:0 0 32px rgba(56,189,248,0.8); }
+ .speaking .core-eye { animation:pulseSpeak 0.45s ease-in-out infinite alternate; }
+ @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+ @keyframes spinRev { from { transform:rotate(360deg); } to { transform:rotate(0deg); } }
+ @keyframes pulseSpeak { from { transform:scale(1.0); box-shadow:0 0 36px rgba(255,42,133,0.8); } to { transform:scale(1.14); box-shadow:0 0 68px rgba(255,42,133,1); } }
+ .status-bar { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--rose); margin-bottom:16px; letter-spacing:0.5px; }
+ .controls { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:20px; }
+ .btn { background:linear-gradient(135deg,#E11D74 0%,#88134D 100%); color:#FFF; font-weight:700; font-size:13.5px; padding:11px 22px; border-radius:999px; border:1px solid #F9A8D4; cursor:pointer; box-shadow:0 6px 20px rgba(225,29,116,0.35); }
+ .btn-ghost { background:transparent; border:1.5px solid var(--rose); color:var(--rose); box-shadow:none; }
+ .chat-box { width:100%; max-width:760px; background:rgba(12,4,9,0.75); border:1px solid var(--border); border-radius:16px; padding:16px; text-align:left; max-height:260px; overflow-y:auto; margin-bottom:14px; display:flex; flex-direction:column; gap:10px; }
+ .msg { font-size:13.8px; line-height:1.55; padding:10px 14px; border-radius:12px; }
+ .msg-lexi { background:rgba(255,42,133,0.14); border-left:3px solid var(--pink); color:#FFF5FA; }
+ .msg-user { background:rgba(255,255,255,0.07); border-right:3px solid var(--rose); color:#E5C1D3; align-self:flex-end; }
+ .input-row { width:100%; max-width:760px; display:flex; gap:10px; }
+ .txt-in { flex:1; background:rgba(255,255,255,0.08); border:1.5px solid var(--border); color:#FFF; border-radius:999px; padding:12px 18px; font-size:14px; font-family:inherit; outline:none; }
+ .key-drawer { width:100%; max-width:760px; margin-top:16px; padding:14px 18px; background:rgba(255,42,133,0.08); border:1px dashed var(--border); border-radius:14px; display:none; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+ .key-drawer.open { display:flex; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">LEXI<span> // NEURAL CORE</span></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <button class="pill" onclick="toggleKeyDrawer()">⚙ GEMINI NEURAL KEY</button>
+    <a class="pill" href="https://github.io">← BACK TO STUDIO</a>
+  </div>
+</div>
+
+<div class="core-stage">
+  <div class="pill">LEXITECH AUTONOMOUS INTERFACE // ENGINEERED BY HEIDI SECKMAN</div>
+  <div class="holo-wrap" id="holoWrap">
+    <div class="ring ring-1"></div>
+    <div class="ring ring-2"></div>
+    <div class="ring ring-3"></div>
+    <div class="core-eye">
+      <span>LEXI</span>
+      <small id="coreState">STANDBY</small>
+    </div>
+  </div>
+  <div class="status-bar" id="statusText">SYSTEM READY — CLICK "TALK TO LEXI" OR TYPE BELOW</div>
+
+  <div class="controls">
+    <button class="btn" id="micBtn" onclick="startListening()">🎙 Talk to Lexi</button>
+    <button class="btn btn-ghost" id="wakeBtn" onclick="toggleWakeMode()">👂 Wake Word ("Hey Lexi"): OFF</button>
+    <button class="btn btn-ghost" onclick="stopSpeech()">⏹ Mute Voice</button>
+  </div>
+
+  <div class="chat-box" id="chatLog">
+    <div class="msg msg-lexi"><strong>LEXI:</strong> Neural core online. Welcome back to LexiTech Studio, Heidi. Ask me about any of our four forensic AI engines, or say <em>"Open Tax-Trap Scanner"</em>, <em>"Launch Life Event Simulator"</em>, or <em>"Open Cloud Workspace"</em>.</div>
+  </div>
+
+  <form class="input-row" onsubmit="handleTextSubmit(event)">
+    <input class="txt-in" id="userInput" type="text" placeholder="Ask Lexi anything or give a studio command..." autocomplete="off" />
+    <button type="submit" class="btn">Send →</button>
+  </form>
+
+  <div class="key-drawer" id="keyDrawer">
+    <span style="font-size:12.5px;color:#F9A8D4;">Optional Gemini API Key (saved privately in your browser only):</span>
+    <input class="txt-in" id="apiKeyInput" type="password" placeholder="AIzaSy..." style="min-width:220px;" />
+    <button class="btn" onclick="saveKey()">Save Key</button>
+  </div>
+</div>
+<script>
+const MODULES = {
+  assistant: { name: "Module 01: Legal & Tax Document AI Assistant", url: "https://streamlit.app" },
+  tax: { name: "Module 02: Tax-Trap Contract Scanner", url: "https://streamlit.app" },
+  life: { name: "Module 03: Worst-Case Life Event Simulator", url: "https://streamlit.app" },
+  workplace: { name: "Module 04: LexiTech Pro Cloud Workspace", url: "https://streamlit.app" }
+};
+
+let wakeMode = false;
+let recognition = null;
+
+function setVisualState(state, label) {
+  const wrap = document.getElementById('holoWrap');
+  wrap.classList.remove('listening', 'speaking');
+  if (state) wrap.classList.add(state);
+  document.getElementById('coreState').textContent = label;
+}
+
+function addMessage(sender, text) {
+  const log = document.getElementById('chatLog');
+  const div = document.createElement('div');
+  div.className = sender === 'LEXI' ? 'msg msg-lexi' : 'msg msg-user';
+  div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v => /Samantha|Ava|Google UK English Female|Microsoft Aria|Zira/i.test(v.name));
+  if (preferred) utter.voice = preferred;
+  utter.rate = 1.02;
+  utter.pitch = 1.05;
+  utter.onstart = () => setVisualState('speaking', 'TRANSMITTING');
+  utter.onend = () => {
+    setVisualState('', 'STANDBY');
+    if (wakeMode) startListening(true);
+  };
+  window.speechSynthesis.speak(utter);
+}
+
+function stopSpeech() {
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  setVisualState('', 'STANDBY');
+}
+
+function toggleKeyDrawer() {
+  document.getElementById('keyDrawer').classList.toggle('open');
+  document.getElementById('apiKeyInput').value = localStorage.getItem('lexi_gemini_key') || '';
+}
+
+function saveKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if (val) localStorage.setItem('lexi_gemini_key', val);
+  else localStorage.removeItem('lexi_gemini_key');
+  document.getElementById('keyDrawer').classList.remove('open');
+  const msg = val ? "Neural Gemini key encrypted locally. Full cognitive mode active." : "API key cleared. Running in local studio command mode.";
+  addMessage('LEXI', msg);
+  speak(msg);
+}
+
+function checkStudioCommand(q) {
+  const s = q.toLowerCase();
+  if (/(open|launch|start).*(tax|trap|scanner|module 2|module two)/.test(s)) return MODULES.tax;
+  if (/(open|launch|start).*(life|event|simulator|crisis|module 3|module three)/.test(s)) return MODULES.life;
+  if (/(open|launch|start).*(workplace|workspace|vault|cloud|login|module 4|module four)/.test(s)) return MODULES.workplace;
+  if (/(open|launch|start).*(assistant|document|audit|module 1|module one)/.test(s)) return MODULES.assistant;
+  return null;
+}
+
+async function processQuery(rawText) {
+  const text = rawText.trim();
+  if (!text) return;
+  addMessage('YOU', text);
+
+  const cmd = checkStudioCommand(text);
+  if (cmd) {
+    const reply = `Executing launch sequence for ${cmd.name}. Opening your secure module tab now.`;
+    addMessage('LEXI', reply);
+    speak(reply);
+    window.open(cmd.url, '_blank', 'noopener');
+    return;
+  }
+
+  const apiKey = localStorage.getItem('lexi_gemini_key');
+  if (!apiKey) {
+    const fallback = "I am LEXI, the cyber-forensic AI core engineered by Heidi Seckman. I oversee four closed-book legal and tax engines verified on over 90 megabytes of IRS manuals. Say 'Open Tax-Trap Scanner', 'Launch Life Event Simulator', or 'Open Cloud Workspace'—or click Gemini Neural Key above to connect my full language core.";
+    addMessage('LEXI', fallback);
+    speak(fallback);
+    return;
+  }
+
+  document.getElementById('statusText').textContent = 'PROCESSING NEURAL QUERY...';
+  try {
+    const res = await fetch(`https://googleapis.com{encodeURIComponent(apiKey)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: "You are LEXI, the cyber-forensic AI core of LexiTech Legal & Tax AI Studio, engineered by Heidi Seckman. Speak with calm, sharp, authoritative intelligence (like the Red Queen or M3GAN, helpful and fiercely protective of the user). Keep responses concise (2-4 sentences) so they sound natural when spoken aloud." }] },
+        contents: [{ role: 'user', parts: [{ text }] }]
+      })
+    });
+    const data = await res.json();
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Neural link interrupted. Please verify your Gemini API key.";
+    document.getElementById('statusText').textContent = 'SYSTEM READY';
+    addMessage('LEXI', reply);
+    speak(reply);
+  } catch (err) {
+    document.getElementById('statusText').textContent = 'LINK ERROR';
+    const errMsg = "Unable to reach the Gemini neural endpoint. Check your connection or API key.";
+    addMessage('LEXI', errMsg);
+    speak(errMsg);
+  }
+}
+
+function handleTextSubmit(e) {
+  e.preventDefault();
+  const inp = document.getElementById('userInput');
+  const val = inp.value;
+  inp.value = '';
+  processQuery(val);
+}
+
+function startListening(passive = false) {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) {
+    document.getElementById('statusText').textContent = 'VOICE INPUT NOT SUPPORTED IN THIS BROWSER — USE TEXT INPUT BELOW';
+    return;
+  }
+  if (recognition) { try { recognition.abort(); } catch (e) {} }
+  recognition = new SpeechRec();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.onstart = () => {
+    setVisualState('listening', passive ? 'WAKE LISTENING' : 'LISTENING');
+    document.getElementById('statusText').textContent = passive ? 'SAY "HEY LEXI..."' : 'LISTENING TO VOICE INPUT...';
+  };
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    if (passive) {
+      if (/lexi/i.test(transcript)) {
+        const cleaned = transcript.replace(/hey\s*lexi[, ]*/i, '').trim() || "Yes, I am listening.";
+        processQuery(cleaned);
+      } else if (wakeMode) {
+        startListening(true);
+      }
+    } else {
+      processQuery(transcript);
+    }
+  };
+  recognition.onerror = () => {
+    setVisualState('', 'STANDBY');
+    document.getElementById('statusText').textContent = 'VOICE STANDBY';
+  };
+  recognition.onend = () => {
+    if (!document.getElementById('holoWrap').classList.contains('speaking')) {
+      setVisualState('', 'STANDBY');
+    }
+  };
+  recognition.start();
+}
+
+function toggleWakeMode() {
+  wakeMode = !wakeMode;
+  document.getElementById('wakeBtn').textContent = `👂 Wake Word ("Hey Lexi"): ${wakeMode ? 'ON' : 'OFF'}`;
+  if (wakeMode) startListening(true);
+  else if (recognition) recognition.abort();
+}
+</script>
+</body>
+</html>
