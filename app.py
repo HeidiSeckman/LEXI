@@ -89,3 +89,18 @@ exec("\n".join([
 "    reply = reply or ('Missing GEMINI_API_KEY in Secrets.' if not g_key else f'Model error: {err}')",
 "    st.session_state['messages'].append({'role': 'assistant', 'content': reply})",
 "    st.chat_message('assistant').markdown(reply)",
+    "el_key = st.secrets.get('ELEVENLABS_API_KEY', '')",
+    "el_host = '.'.join(['api', 'elevenlabs', 'io'])",
+    "el_url = f'https://{el_host}/v1/text-to-speech/yM93hbw8Qtvdma2wCnJG'",
+    "spoken = re.sub(r'\\s+', ' ', re.sub(r'[*#`_~>|/]+', ' ', reply)).strip()[:800]",
+    "if el_key and spoken:",
+    "    try:",
+    "        r_el = requests.post(el_url, json={'text': spoken, 'model_id': 'eleven_turbo_v2_5', 'voice_settings': {'stability': 0.38, 'similarity_boost': 0.82, 'style': 0.25}}, headers={'xi-api-key': el_key, 'Content-Type': 'application/json'}, timeout=20)",
+    "        if r_el.status_code == 200:",
+    "            b64_a = base64.b64encode(r_el.content).decode()",
+    "            st.markdown(f'<audio controls autoplay src=\"data:audio/mp3;base64,{b64_a}\" style=\"width:100%;height:36px;margin-top:6px;border-radius:12px;\"></audio>', unsafe_allow_html=True)",
+    "        else:",
+    "            st.caption(f'Voice ({r_el.status_code}): {r_el.text[:100]}')",
+    "    except Exception as ve:",
+    "        st.caption(f'Voice error: {ve}')"
+]))
