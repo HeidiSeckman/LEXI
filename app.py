@@ -1,3 +1,44 @@
+import streamlit as st
+import base64
+import os
+import random
+import re
+import requests
+
+from google import genai
+from google.genai import types
+
+st.set_page_config(
+    page_title="LEXI // LexiTech",
+    page_icon="✨",
+    layout="centered",
+)
+
+# ---------- Secrets ----------
+def get_secret(name, fallback=""):
+    try:
+        value = st.secrets.get(name, fallback)
+        return str(value).strip() if value else fallback
+    except Exception:
+        return fallback
+
+GEMINI_KEY = get_secret("GEMINI_API_KEY") or get_secret("GOOGLE_API_KEY")
+GROQ_KEY = get_secret("GROQ_API_KEY")
+ELEVEN_KEY = get_secret("ELEVENLABS_API_KEY")
+
+# ---------- Avatar ----------
+avatar_path = "LEXI_avatar.png"
+avatar_data = ""
+if os.path.exists(avatar_path):
+    try:
+        with open(avatar_path, "rb") as avatar_file:
+            avatar_data = (
+                "data:image/png;base64,"
+                + base64.b64encode(avatar_file.read()).decode("utf-8")
+            )
+    except OSError:
+        avatar_data = ""
+
 # ---------- Executive styling (matched to LexiTech Legal & Tax Suite) ----------
 ST_OPEN = "<" + "style>"
 ST_CLOSE = "<" + "/style>"
@@ -7,7 +48,7 @@ css_1 = (
     "html,body,.stApp,[data-testid='stAppViewContainer'],[data-testid='stMain']{"
     " background:#F6F7F9!important;color:#0F172A!important;"
     " font-family:'Plus Jakarta Sans',sans-serif!important}"
-    "#MainMenu,footer,header,[data-testid='stHeader'],[data-testid='stToolbar']{"
+    "#MainMenu,footer,header,[data-testid="stHeader"],[data-testid="stToolbar"]{"
     " display:none!important}"
     "[data-testid='stBottom'],[data-testid='stBottom']>div,"
     "[data-testid='stBottomBlockContainer']{background:#F6F7F9!important}"
