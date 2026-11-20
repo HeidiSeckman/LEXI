@@ -1,3 +1,17 @@
+# ---------- Avatar ----------
+avatar_path = "LEXI_avatar.png"
+avatar_data = ""
+if os.path.exists(avatar_path):
+    try:
+        with open(avatar_path, "rb") as avatar_file:
+            avatar_data = (
+                "data:image/png;base64,"
+                + base64.b64encode(avatar_file.read()).decode("utf-8")
+            )
+    except OSError:
+        avatar_data = ""
+
+# ---------- Executive styling (matched to LexiTech Legal & Tax Suite) ----------
 ST_OPEN = "<" + "style>"
 ST_CLOSE = "<" + "/style>"
 
