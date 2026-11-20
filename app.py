@@ -59,46 +59,47 @@ for i in range(28):
 
 css = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Orbitron:wght@700&family=JetBrains+Mono&display=swap');
+@import url('https://googleapis.com');
 html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="stMain"]{
- background:#050205!important;color:#FFF5FA!important;
+ background:#F6F7F9!important;color:#0F172A!important;
  font-family:'Plus Jakarta Sans',sans-serif!important
 }
 #MainMenu,footer,header,[data-testid="stHeader"],[data-testid="stToolbar"]{
  display:none!important
 }
 [data-testid="stBottom"],[data-testid="stBottom"]>div,
-[data-testid="stBottomBlockContainer"]{background:#050205!important}
-.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
- background:radial-gradient(circle at 50% 15%,rgba(255,42,133,.16),#050205 65%)}
-.rc{position:absolute;top:-100%;font:12px 'JetBrains Mono',monospace;
- color:rgba(255,65,150,.28);animation:f linear infinite}
-@keyframes f{to{transform:translateY(210vh)}}
-@keyframes floatAv{0%,100%{transform:translateY(0px)}50%{transform:translateY(-6px)}}
+[data-testid="stBottomBlockContainer"]{background:#F6F7F9!important}
+.bg,.rc{display:none!important}
+@keyframes floatAv{0%,100%{transform:translateY(0px)}50%{transform:translateY(-4px)}}
 @keyframes auraPulse{
- 0%,100%{box-shadow:0 0 18px rgba(255,42,133,.55),0 0 36px rgba(255,42,133,.25)}
- 50%{box-shadow:0 0 32px rgba(255,42,133,.95),0 0 64px rgba(249,168,212,.55)}
+ 0%,100%{box-shadow:0 6px 20px rgba(249,168,212,.35)}
+ 50%{box-shadow:0 10px 28px rgba(249,168,212,.60)}
 }
 .block-container{position:relative;z-index:2;max-width:780px!important}
-.card{display:flex;align-items:center;gap:20px;padding:18px;border-radius:18px;
- background:rgba(16,5,12,.82);border:1px solid rgba(255,42,133,.45);margin-bottom:14px}
+.card{display:flex;align-items:center;gap:20px;padding:20px 24px;border-radius:18px;
+ background:linear-gradient(135deg,#3D0E27 0%,#6D1A45 55%,#882257 100%);
+ border:1px solid rgba(255,255,255,.16);box-shadow:0 12px 28px rgba(61,14,39,.16);margin-bottom:14px}
+.card h3{color:#FFFFFF!important}
+.card p{color:rgba(255,245,250,.92)!important}
 .card img{width:110px;height:135px;object-fit:cover;border-radius:14px;
- border:2px solid #FF2A85;animation:floatAv 3.4s ease-in-out infinite,
+ border:2px solid #F9A8D4;animation:floatAv 3.4s ease-in-out infinite,
  auraPulse 2.4s ease-in-out infinite;transition:transform .15s ease,box-shadow .15s ease}
 .card img.speaking{border-color:#F9A8D4;
- box-shadow:0 0 42px #FF2A85,0 0 80px rgba(249,168,212,.85)!important}
+ box-shadow:0 0 28px rgba(249,168,212,.85)!important}
 div.stButton>button{width:100%;border-radius:12px!important;
- background:rgba(18,6,14,.85)!important;border:1px solid rgba(255,42,133,.45)!important;
- color:#FFF5FA!important;font-weight:600!important}
-[data-testid="stAudioInput"]{background:rgba(18,6,14,.85)!important;
- border:1px solid rgba(255,42,133,.55)!important;border-radius:14px!important;padding:8px!important}
-[data-testid="stChatMessage"]{background:rgba(16,5,12,.85)!important;
- border:1px solid rgba(255,42,133,.35)!important;border-radius:14px!important}
-[data-testid="stChatMessage"] p{color:#FFF5FA!important}
-[data-testid="stChatInput"]{background:#10050C!important;border:1px solid #FF2A85!important;
+ background:#FFFFFF!important;border:1px solid #E2E8F0!important;
+ color:#0F172A!important;font-weight:600!important;box-shadow:0 2px 6px rgba(15,23,42,.04)!important}
+div.stButton>button:hover{border-color:#BE185D!important;color:#BE185D!important}
+[data-testid="stExpander"]{background:#FFFFFF!important;border:1px solid #E2E8F0!important;border-radius:14px!important}
+[data-testid="stAudioInput"]{background:#FFFFFF!important;
+ border:1px solid rgba(157,23,77,.28)!important;border-radius:14px!important;padding:8px!important}
+[data-testid="stChatMessage"]{background:#FFFFFF!important;
+ border:1px solid #E2E8F0!important;border-radius:14px!important;box-shadow:0 2px 8px rgba(15,23,42,.03)!important}
+[data-testid="stChatMessage"] p,[data-testid="stChatMessage"] li{color:#0F172A!important}
+[data-testid="stChatInput"]{background:#FFFFFF!important;border:1.5px solid #BE185D!important;
  border-radius:14px!important}
-[data-testid="stChatInput"] textarea{color:#FFF5FA!important}
-.status{font-size:12px;color:#FFD6E8;opacity:.9;margin:4px 0 12px}
+[data-testid="stChatInput"] textarea{color:#0F172A!important}
+.status{font-size:12px;color:#475569!important;font-weight:500;margin:4px 0 12px}
 </style>
 """
 
