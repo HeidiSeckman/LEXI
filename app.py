@@ -61,45 +61,65 @@ css = """
 <style>
 @import url('https://googleapis.com');
 html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="stMain"]{
- background:radial-gradient(circle at 50% 0%,#1E293B 0%,#0F172A 65%,#090D16 100%)!important;
- color:#F8FAFC!important;font-family:'Plus Jakarta Sans',sans-serif!important
+ background-color:#11070E!important;
+ background-image:
+  radial-gradient(circle at 50% 0%,rgba(136,34,87,.38) 0%,rgba(34,11,26,.92) 52%,#0D050B 100%),
+  linear-gradient(rgba(244,114,182,.045) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(244,114,182,.045) 1px,transparent 1px)!important;
+ background-size:100% 100%,36px 36px,36px 36px!important;
+ color:#FDF2F8!important;font-family:'Plus Jakarta Sans',sans-serif!important
 }
 #MainMenu,footer,header,[data-testid="stHeader"],[data-testid="stToolbar"]{
  display:none!important
 }
 [data-testid="stBottom"],[data-testid="stBottom"]>div,
-[data-testid="stBottomBlockContainer"]{background:#090D16!important}
+[data-testid="stBottomBlockContainer"]{background:transparent!important}
 .bg,.rc{display:none!important}
-@keyframes floatAv{0%,100%{transform:translateY(0px)}50%{transform:translateY(-4px)}}
+@keyframes floatAv{0%,100%{transform:translateY(0px)}50%{transform:translateY(-5px)}}
 @keyframes auraPulse{
- 0%,100%{box-shadow:0 8px 24px rgba(190,24,93,.35)}
- 50%{box-shadow:0 12px 32px rgba(244,114,182,.55)}
+ 0%,100%{box-shadow:0 0 20px rgba(244,114,182,.35),0 0 40px rgba(136,34,87,.25)}
+ 50%{box-shadow:0 0 30px rgba(249,168,212,.60),0 0 55px rgba(190,24,93,.35)}
 }
 .block-container{position:relative;z-index:2;max-width:780px!important}
-.card{display:flex;align-items:center;gap:20px;padding:20px 24px;border-radius:18px;
- background:linear-gradient(135deg,#3D0E27 0%,#6D1A45 55%,#882257 100%);
- border:1px solid rgba(249,168,212,.28);box-shadow:0 14px 32px rgba(0,0,0,.35);margin-bottom:14px}
-.card h3{color:#FFFFFF!important}
-.card p{color:rgba(255,245,250,.92)!important}
+.card{display:flex;align-items:center;gap:20px;padding:22px 26px;border-radius:20px;
+ background:linear-gradient(135deg,rgba(61,14,39,.92) 0%,rgba(109,26,69,.88) 55%,rgba(44,11,29,.96) 100%);
+ backdrop-filter:blur(18px);border:1.5px solid rgba(249,168,212,.38);
+ box-shadow:0 18px 40px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.14);margin-bottom:16px}
+.card h3{color:#FFFFFF!important;letter-spacing:.02em}
+.card p{color:rgba(253,242,248,.90)!important}
 .card img{width:110px;height:135px;object-fit:cover;border-radius:14px;
  border:2px solid #F9A8D4;animation:floatAv 3.4s ease-in-out infinite,
  auraPulse 2.4s ease-in-out infinite;transition:transform .15s ease,box-shadow .15s ease}
-.card img.speaking{border-color:#F9A8D4;
- box-shadow:0 0 32px rgba(244,114,182,.85)!important}
-div.stButton>button{width:100%;border-radius:12px!important;
- background:#1E293B!important;border:1px solid #334155!important;
- color:#F8FAFC!important;font-weight:600!important;box-shadow:0 4px 12px rgba(0,0,0,.2)!important}
-div.stButton>button:hover{border-color:#F472B6!important;background:#263349!important;color:#FFFFFF!important}
-[data-testid="stExpander"]{background:#1E293B!important;border:1px solid #334155!important;border-radius:14px!important;color:#F8FAFC!important}
-[data-testid="stAudioInput"]{background:#1E293B!important;
- border:1px solid rgba(244,114,182,.35)!important;border-radius:14px!important;padding:8px!important}
-[data-testid="stChatMessage"]{background:#1E293B!important;
- border:1px solid #334155!important;border-radius:14px!important;box-shadow:0 4px 14px rgba(0,0,0,.22)!important}
-[data-testid="stChatMessage"] p,[data-testid="stChatMessage"] li{color:#F1F5F9!important}
-[data-testid="stChatInput"]{background:#1E293B!important;border:1.5px solid #BE185D!important;
- border-radius:14px!important}
-[data-testid="stChatInput"] textarea{color:#F8FAFC!important}
-.status{font-size:12px;color:#CBD5E1!important;font-weight:500;margin:4px 0 12px}
+.card img.speaking{border-color:#FCE7F3;
+ box-shadow:0 0 36px rgba(249,168,212,.90)!important}
+div.stButton>button{width:100%;border-radius:14px!important;
+ background:linear-gradient(145deg,rgba(46,15,34,.92),rgba(28,9,21,.96))!important;
+ border:1.5px solid rgba(249,168,212,.34)!important;
+ color:#FDF2F8!important;font-weight:600!important;padding:10px 14px!important;
+ box-shadow:0 6px 16px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.08)!important;
+ transition:all .2s ease!important}
+div.stButton>button:hover{border-color:#F9A8D4!important;
+ background:linear-gradient(145deg,rgba(109,26,69,.85),rgba(61,14,39,.95))!important;
+ box-shadow:0 0 20px rgba(244,114,182,.35)!important;transform:translateY(-1px)}
+[data-testid="stExpander"]{
+ background:rgba(34,11,26,.88)!important;backdrop-filter:blur(16px)!important;
+ border:1.5px solid rgba(249,168,212,.28)!important;border-radius:14px!important;
+ box-shadow:0 8px 20px rgba(0,0,0,.28)!important}
+[data-testid="stAudioInput"]{
+ background:linear-gradient(145deg,rgba(42,14,31,.92),rgba(24,8,18,.96))!important;
+ border:1.5px solid rgba(249,168,212,.38)!important;border-radius:16px!important;
+ padding:10px!important;box-shadow:0 8px 22px rgba(0,0,0,.30)!important}
+[data-testid="stChatMessage"]{
+ background:linear-gradient(145deg,rgba(38,12,28,.90),rgba(22,7,17,.94))!important;
+ backdrop-filter:blur(16px)!important;border:1px solid rgba(249,168,212,.26)!important;
+ border-left:3px solid #BE185D!important;border-radius:16px!important;
+ box-shadow:0 8px 24px rgba(0,0,0,.30)!important}
+[data-testid="stChatMessage"] p,[data-testid="stChatMessage"] li{color:#FDF2F8!important}
+[data-testid="stChatInput"]{
+ background:rgba(30,10,23,.95)!important;border:1.5px solid rgba(249,168,212,.45)!important;
+ border-radius:16px!important;box-shadow:0 8px 24px rgba(0,0,0,.35)!important}
+[data-testid="stChatInput"] textarea{color:#FDF2F8!important}
+.status{font-size:12px;color:#FBCFE8!important;font-weight:600;letter-spacing:.02em;margin:4px 0 12px}
 </style>
 """
 
